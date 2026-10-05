@@ -23,6 +23,28 @@ npm run typecheck    # tsc --noEmit
 npm test             # vitest run
 ```
 
+## Banco de dados
+
+O DDL vive em [`supabase/migrations/`](supabase/migrations/) e o controle do que já
+rodou fica na tabela `public._migrations_aplicadas` do próprio banco.
+
+```powershell
+. .\scripts\supabase.ps1              # helper da API Supabase (lê o .env)
+. .\scripts\aplicar-migrations.ps1    # aplica só o que ainda não rodou
+. .\scripts\seed.ps1                  # cria as 3 contas de teste e dados de exemplo
+. .\scripts\verificar-t04.ps1         # 30 verificações de regra de dados (PASS/FALHA)
+```
+
+As contas criadas pelo seed (e-mail e senha) estão em [`scripts/seed.ps1`](scripts/seed.ps1).
+
+**Postura de segurança** ([ADR 0003](docs/adr/0003-stack-sem-orm.md)):
+
+- RLS ligado em **todas** as tabelas, sem nenhum `policy` de `select` comum;
+- privilégios de tabela revogados de `anon` e `authenticated`;
+- todo acesso de negócio passa por funções `SECURITY DEFINER` (RPC);
+- Storage é a exceção: bucket `anexos` privado, com policies por pasta
+  `{locadora_id}/...` — um anexo nunca sai da locadora dona.
+
 ## Documentação de decisão
 
 | Arquivo                                                                      | Conteúdo                                                |
