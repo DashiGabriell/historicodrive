@@ -2,8 +2,8 @@
 # Uso: . .\scripts\supabase.ps1 ; . .\scripts\verificar-t04.ps1
 
 $e = Get-HdEnv
-$base = $e['NEXT_PUBLIC_SUPABASE_URL']
-$pub = $e['NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY']
+$base = $e['VITE_SUPABASE_URL']
+$pub = $e['VITE_SUPABASE_PUBLISHABLE_KEY']
 $falhas = 0
 
 foreach ($k in @('SEED_SENHA_ADMIN', 'SEED_SENHA_CENTRAL', 'SEED_SENHA_VIANORTE')) {

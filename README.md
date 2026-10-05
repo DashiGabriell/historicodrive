@@ -39,6 +39,10 @@ rodou fica na tabela `public._migrations_aplicadas` do próprio banco.
 As contas criadas pelo seed usam as senhas `SEED_SENHA_*` do `.env`
 (ver [`.env.example`](.env.example)); elas nunca ficam no código.
 
+`verificar-t04.ps1` **altera** dados de exemplo (muda estado de incidente e tira
+a locadora da fila). Antes de repetir a verificação, rode o `seed.ps1` de novo
+para devolver os dados ao estado inicial.
+
 **Postura de segurança** ([ADR 0003](docs/adr/0003-stack-sem-orm.md)):
 
 - RLS ligado em **todas** as tabelas, sem nenhum `policy` de `select` comum;

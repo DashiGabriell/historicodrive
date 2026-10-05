@@ -41,7 +41,7 @@ T06, T08
 - RLS ligado em todas as tabelas, policy por policy.
 - RPC `security definer`: `buscar_motorista`, `abrir_ficha`, `painel_kpis`.
 - Trigger de `audit_log` nas mutacoes de `incidente`.
-- `.env.example` com `NEXT_PUBLIC_SUPABASE_URL` e `NEXT_PUBLIC_SUPABASE_ANON_KEY`.
+- `.env.example` com `VITE_SUPABASE_URL` e `VITE_SUPABASE_PUBLISHABLE_KEY`.
 - Seed: superadmin, locadora A (aprovada), locadora B (aprovada).
 
 ## Bloqueia

@@ -4,7 +4,7 @@
 # As senhas vem de .env (SEED_SENHA_*) e nunca ficam no codigo.
 
 $env = Get-HdEnv
-$base = $env['NEXT_PUBLIC_SUPABASE_URL']
+$base = $env['VITE_SUPABASE_URL']
 $secret = $env['SUPABASE_SECRET_KEY']
 
 function Novo-Usuario {
