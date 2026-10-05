@@ -6,10 +6,7 @@ const root = process.cwd();
 
 const globalsCss = readFileSync(resolve(root, "src/app/globals.css"), "utf8");
 const tokensCss = readFileSync(resolve(root, "docs/estilo/tokens.css"), "utf8");
-const tokens3dCss = readFileSync(
-  resolve(root, "docs/estilo/tokens-3d.css"),
-  "utf8",
-);
+const tokens3dCss = readFileSync(resolve(root, "docs/estilo/tokens-3d.css"), "utf8");
 
 describe("design system ESTILO", () => {
   it("declar tokens essenciais em tokens.css", () => {
