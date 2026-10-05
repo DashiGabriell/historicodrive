@@ -1,6 +1,7 @@
 ﻿# HistÃ³ricoDrive â€” seed do banco (dev/QA).
 # Uso: . .\scripts\supabase.ps1 ; . .\scripts\seed.ps1
 # Idempotente: usuarios ja existentes sao aproveitados.
+# As senhas vem de .env (SEED_SENHA_*) e nunca ficam no codigo.
 
 $env = Get-HdEnv
 $base = $env['NEXT_PUBLIC_SUPABASE_URL']
@@ -31,10 +32,15 @@ function Novo-Usuario {
   }
 }
 
-$senhas = @{
-  'admin@historicodrive.app' = 'Historico-2026!Admin'
-  'dono.central@historicodrive.app' = 'Historico-2026!Central'
-  'dono.vianorte@historicodrive.app' = 'Historico-2026!ViaNorte'
+$senhas = @{}
+foreach ($par in @(
+    @('admin@historicodrive.app', 'SEED_SENHA_ADMIN'),
+    @('dono.central@historicodrive.app', 'SEED_SENHA_CENTRAL'),
+    @('dono.vianorte@historicodrive.app', 'SEED_SENHA_VIANORTE')
+  )) {
+  $senha = $env[$par[1]]
+  if (-not $senha) { throw "$($par[1]) ausente no .env (ver .env.example)" }
+  $senhas[$par[0]] = $senha
 }
 
 $ids = @{}

@@ -6,6 +6,10 @@ $base = $e['NEXT_PUBLIC_SUPABASE_URL']
 $pub = $e['NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY']
 $falhas = 0
 
+foreach ($k in @('SEED_SENHA_ADMIN', 'SEED_SENHA_CENTRAL', 'SEED_SENHA_VIANORTE')) {
+  if (-not $e[$k]) { throw "$k ausente no .env (ver .env.example)" }
+}
+
 function Ok([string]$nome, [bool]$cond, [string]$detalhe = "") {
   if ($cond) { Write-Host "  PASS  $nome $detalhe" -ForegroundColor Green }
   else { Write-Host "  FALHA $nome $detalhe" -ForegroundColor Red; $script:falhas++ }
@@ -38,9 +42,9 @@ function Texto($x) {
   return ($x | ConvertTo-Json -Depth 8 -Compress)
 }
 
-$central = Login 'dono.central@historicodrive.app' 'Historico-2026!Central'
-$vianorte = Login 'dono.vianorte@historicodrive.app' 'Historico-2026!ViaNorte'
-$admin = Login 'admin@historicodrive.app' 'Historico-2026!Admin'
+$central = Login 'dono.central@historicodrive.app' $e['SEED_SENHA_CENTRAL']
+$vianorte = Login 'dono.vianorte@historicodrive.app' $e['SEED_SENHA_VIANORTE']
+$admin = Login 'admin@historicodrive.app' $e['SEED_SENHA_ADMIN']
 
 Write-Host "`n[identidade e visibilidade da rede]" -ForegroundColor Cyan
 $mariaBusca = Rpc $vianorte 'buscar_motorista' @{ p_termo = 'Maria Aparecida Lima' }

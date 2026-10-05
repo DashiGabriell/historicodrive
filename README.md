@@ -35,7 +35,8 @@ rodou fica na tabela `public._migrations_aplicadas` do próprio banco.
 . .\scripts\verificar-t04.ps1         # 30 verificações de regra de dados (PASS/FALHA)
 ```
 
-As contas criadas pelo seed (e-mail e senha) estão em [`scripts/seed.ps1`](scripts/seed.ps1).
+As contas criadas pelo seed usam as senhas `SEED_SENHA_*` do `.env`
+(ver [`.env.example`](.env.example)); elas nunca ficam no código.
 
 **Postura de segurança** ([ADR 0003](docs/adr/0003-stack-sem-orm.md)):
 
