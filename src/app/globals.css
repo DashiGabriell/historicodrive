@@ -1,0 +1,14 @@
+@import "tailwindcss";
+
+/*
+ * Design system HistóricoDrive (fonte: docs/estilo/).
+ * A ordem importa: tokens.css primeiro, tokens-3d.css por cima (plástico vence).
+ * Entram na camada `components` de propósito — assim os utilitários do Tailwind
+ * (grid/gap/spacing, camada `utilities`) continuam vencendo as classes do ESTILO.
+ */
+@import "../../docs/estilo/tokens.css" layer(components);
+@import "../../docs/estilo/tokens-3d.css" layer(components);
+
+@theme inline {
+  --font-sans: var(--font);
+}

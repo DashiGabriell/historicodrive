@@ -1,0 +1,7 @@
+node_modules
+.next
+.next-dev
+coverage
+package-lock.json
+docs/estilo
+docs/tickets
