@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { Link } from "react-router-dom";
 import type { AnchorHTMLAttributes, ButtonHTMLAttributes } from "react";
 import { cx } from "./cx";
 
@@ -50,6 +50,6 @@ export function ButtonLink({
   ...rest
 }: ButtonLinkProps) {
   return (
-    <Link href={href} className={buttonClassName(variant, size, className)} {...rest} />
+    <Link to={href} className={buttonClassName(variant, size, className)} {...rest} />
   );
 }

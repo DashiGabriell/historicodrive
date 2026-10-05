@@ -1,5 +1,4 @@
-"use client";
-
+import { useTitulo } from "@/lib/use-titulo";
 import {
   Alert,
   Avatar,
@@ -95,8 +94,10 @@ function Titulo({ children, id }: { children: string; id: string }) {
 }
 
 export default function StyleguidePage() {
+  useTitulo("Design system — HistóricoDrive");
+
   return (
-    <main className="mx-auto w-full max-w-5xl px-4 py-12">
+    <div className="mx-auto w-full max-w-5xl px-4 py-12">
       <header className="mb-10">
         <p className="eyebrow">HistóricoDrive</p>
         <h1 className="text-3xl font-extrabold tracking-tight">Design system</h1>
@@ -288,6 +289,6 @@ export default function StyleguidePage() {
           </div>
         </section>
       </div>
-    </main>
+    </div>
   );
 }

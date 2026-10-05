@@ -4,7 +4,7 @@ Plataforma interna para **registrar e consultar o histórico de incidentes de mo
 
 ## Stack
 
-- **Next.js 16** (App Router, Turbopack) + **TypeScript**
+- **Vite** + **React 19** + **TypeScript** + **react-router-dom** (SPA)
 - **Tailwind CSS 4** — usado **apenas para layout** (grid/gap/spacing/responsivo)
 - **CSS do design system** em [`docs/estilo/`](docs/estilo/) — fonte única do visual
   (`tokens.css` → `tokens-3d.css`, nesta ordem; a variante plástica vence)
@@ -15,8 +15,9 @@ Plataforma interna para **registrar e consultar o histórico de incidentes de mo
 ## Comandos
 
 ```bash
-npm run dev          # servidor de desenvolvimento
-npm run build        # build de produção
+npm run dev          # servidor de desenvolvimento (Vite)
+npm run build        # build de produção (gera dist/)
+npm run preview      # serve o build local
 npm run lint         # eslint
 npm run format       # prettier --write
 npm run typecheck    # tsc --noEmit

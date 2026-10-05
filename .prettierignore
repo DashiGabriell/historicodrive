@@ -1,6 +1,5 @@
 node_modules
-.next
-.next-dev
+dist
 coverage
 package-lock.json
 docs/estilo

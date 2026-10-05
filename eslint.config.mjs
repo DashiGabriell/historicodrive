@@ -1,21 +1,39 @@
-import { defineConfig, globalIgnores } from "eslint/config";
-import nextVitals from "eslint-config-next/core-web-vitals";
-import nextTs from "eslint-config-next/typescript";
+import js from "@eslint/js";
 import prettier from "eslint-config-prettier";
+import reactHooks from "eslint-plugin-react-hooks";
+import reactRefresh from "eslint-plugin-react-refresh";
+import { defineConfig, globalIgnores } from "eslint/config";
+import globals from "globals";
+import tseslint from "typescript-eslint";
 
-const eslintConfig = defineConfig([
-  ...nextVitals,
-  ...nextTs,
-  prettier,
+export default defineConfig([
   globalIgnores([
-    ".next/**",
-    ".next-dev/**",
-    "out/**",
-    "build/**",
+    "dist/**",
     "coverage/**",
-    "next-env.d.ts",
     "docs/**",
+    "supabase/**",
+    "public/**",
+    "node_modules/**",
   ]),
+  {
+    files: ["**/*.{ts,tsx}"],
+    extends: [
+      js.configs.recommended,
+      tseslint.configs.recommended,
+      reactHooks.configs.flat["recommended-latest"],
+      reactRefresh.configs.vite,
+    ],
+    languageOptions: {
+      ecmaVersion: 2022,
+      globals: { ...globals.browser, ...globals.node },
+    },
+    rules: {
+      // helpers de classe exportados junto com os componentes do design system
+      "react-refresh/only-export-components": [
+        "error",
+        { allowExportNames: ["buttonClassName", "controlClass"] },
+      ],
+    },
+  },
+  prettier,
 ]);
-
-export default eslintConfig;

@@ -1,4 +1,4 @@
-﻿# HistÃ³ricoDrive â€” seed do banco (dev/QA).
+﻿# HistoricoDrive - seed do banco (dev/QA).
 # Uso: . .\scripts\supabase.ps1 ; . .\scripts\seed.ps1
 # Idempotente: usuarios ja existentes sao aproveitados.
 # As senhas vem de .env (SEED_SENHA_*) e nunca ficam no codigo.

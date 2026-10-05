@@ -17,7 +17,6 @@ export function Avatar({ initials, src, size = "md", label, className }: AvatarP
     >
       {src ? (
         // Avatar tem 40-56px e a URL é temporária (assinada): otimizar não traz nada.
-        // eslint-disable-next-line @next/next/no-img-element
         <img src={src} alt={label ?? ""} />
       ) : (
         initials
