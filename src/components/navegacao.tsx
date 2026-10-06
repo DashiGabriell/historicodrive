@@ -10,7 +10,14 @@ import type { Perfil } from "@/lib/sessao-contexto";
 import { Button, cx } from "@/ui";
 
 export type NomeIcone =
-  "painel" | "buscar" | "registrar" | "auditoria" | "config" | "fila";
+  | "painel"
+  | "buscar"
+  | "registrar"
+  | "auditoria"
+  | "config"
+  | "fila"
+  | "mais"
+  | "contestacao";
 
 export type ItemMenu = {
   href: string;
@@ -18,6 +25,8 @@ export type ItemMenu = {
   curto?: string;
   icone: NomeIcone;
   destaque?: boolean;
+  /** no celular sai da barra de abas e vai para a folha "Mais" */
+  secundario?: boolean;
 };
 
 const TRACOS: Record<NomeIcone, string[]> = {
@@ -35,6 +44,16 @@ const TRACOS: Record<NomeIcone, string[]> = {
     "M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z",
   ],
   fila: ["M9 11l3 3 8-8", "M20 12v7a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h9"],
+  mais: [
+    "M6.5 12a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z",
+    "M13.5 12a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z",
+    "M20.5 12a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z",
+  ],
+  contestacao: [
+    "M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z",
+    "M12 7v4",
+    "M12 14h.01",
+  ],
 };
 
 export function Icone({ nome }: { nome: NomeIcone }) {
@@ -55,7 +74,13 @@ export function Icone({ nome }: { nome: NomeIcone }) {
   );
 }
 
-export function BarraAbas({ itens }: { itens: ItemMenu[] }) {
+type BarraAbasProps = {
+  itens: ItemMenu[];
+  /** aba final que abre a folha com os itens secundários e a conta */
+  mais?: { ativa: boolean; aberta: boolean; onAbrir: () => void };
+};
+
+export function BarraAbas({ itens, mais }: BarraAbasProps) {
   return (
     <nav aria-label="Navegação principal" className="tabbar md:hidden">
       {itens.map((item) => (
@@ -71,6 +96,21 @@ export function BarraAbas({ itens }: { itens: ItemMenu[] }) {
           <span className="tabbar-rotulo">{item.curto ?? item.rotulo}</span>
         </NavLink>
       ))}
+      {mais ? (
+        <button
+          type="button"
+          className="tabbar-item"
+          aria-haspopup="dialog"
+          aria-expanded={mais.aberta}
+          aria-current={mais.ativa ? "page" : undefined}
+          onClick={mais.onAbrir}
+        >
+          <span className="tabbar-icone">
+            <Icone nome="mais" />
+          </span>
+          <span className="tabbar-rotulo">Mais</span>
+        </button>
+      ) : null}
     </nav>
   );
 }
@@ -86,6 +126,7 @@ type FolhaContaProps = {
   onFechar: () => void;
   onTrocarLocadora: (id: string) => void;
   onSair: () => void;
+  links?: ItemMenu[];
 };
 
 /** bottom sheet nativo (<dialog>): foco preso, Esc fecha, arrastar para baixo fecha */
@@ -95,6 +136,7 @@ export function FolhaConta({
   onFechar,
   onTrocarLocadora,
   onSair,
+  links = [],
 }: FolhaContaProps) {
   const ref = useRef<HTMLDialogElement>(null);
   const inicioY = useRef<number | null>(null);
@@ -133,7 +175,7 @@ export function FolhaConta({
     <dialog
       ref={ref}
       className="folha"
-      aria-label="Sua conta"
+      aria-label={links.length > 0 ? "Mais opções" : "Sua conta"}
       onClose={onFechar}
       onClick={(e) => {
         if (e.target === e.currentTarget) onFechar();
@@ -160,6 +202,36 @@ export function FolhaConta({
           </div>
         </div>
       </div>
+
+      {links.length > 0 ? (
+        <nav aria-label="Mais seções" className="folha-grupo">
+          {links.map((item) => (
+            <NavLink
+              key={item.href}
+              to={item.href}
+              className="folha-link"
+              onClick={onFechar}
+            >
+              <span className="folha-link-icone">
+                <Icone nome={item.icone} />
+              </span>
+              <span className="min-w-0 flex-1 truncate">{item.rotulo}</span>
+              <svg
+                className="folha-link-seta"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth={2}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+              >
+                <path d="m9 18 6-6-6-6" />
+              </svg>
+            </NavLink>
+          ))}
+        </nav>
+      ) : null}
 
       {perfil.locadoras.length > 0 ? (
         <fieldset className="folha-grupo">

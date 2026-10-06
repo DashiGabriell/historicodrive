@@ -388,7 +388,7 @@ export default function Incidente() {
                 </li>
               ))}
             </ol>
-            <Link to="/auditoria" className="text-sm font-semibold text-primary">
+            <Link to="/auditoria" className="link-acao self-start">
               Ver auditoria completa →
             </Link>
           </Card>

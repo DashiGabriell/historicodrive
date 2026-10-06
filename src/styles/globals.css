@@ -276,10 +276,15 @@
     align-items: center;
     justify-content: center;
     gap: 0.15rem;
+    padding: 0;
+    border: none;
+    background: transparent;
     color: hsl(var(--muted-foreground));
-    font-size: 0.6875rem;
+    font: inherit;
+    font-size: clamp(0.625rem, 2.75vw, 0.6875rem);
     font-weight: 600;
-    letter-spacing: 0.01em;
+    letter-spacing: -0.005em;
+    cursor: pointer;
     transition:
       color 0.15s ease,
       transform 0.12s ease;
@@ -532,6 +537,12 @@
     .table-responsiva td:first-child::before {
       display: none;
     }
+
+    .table-responsiva td:first-child a {
+      display: inline-flex;
+      align-items: center;
+      min-height: 44px;
+    }
   }
 
   /* ---------- só no celular / tablet pequeno ---------- */
@@ -573,6 +584,78 @@
     .acoes-fixas > .btn {
       flex: 1;
     }
+
+    .card-pad {
+      padding: 1rem;
+    }
+
+    .input[type="date"] {
+      padding-inline: 0.7rem;
+    }
+
+    .tabs > .tab {
+      padding-inline: 0.5rem;
+      white-space: nowrap;
+    }
+  }
+
+  /* link de ação solto (fora de um parágrafo): alvo de toque de botão */
+  .link-acao {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: hsl(var(--primary));
+  }
+
+  .switch::before {
+    content: "";
+    position: absolute;
+    inset: -9px -4px;
+  }
+
+  .folha-link {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    min-height: 52px;
+    padding: 0 0.75rem 0 1rem;
+    border: 1px solid hsl(var(--border));
+    border-radius: calc(var(--radius) - 4px);
+    background: hsl(var(--card));
+    font-weight: 600;
+    transition: transform 0.12s ease;
+  }
+
+  .folha-link:active {
+    transform: scale(0.98);
+  }
+
+  .folha-link[aria-current="page"] {
+    border-color: hsl(var(--primary) / 0.5);
+    background: hsl(var(--primary) / 0.07);
+    color: hsl(var(--primary));
+  }
+
+  .folha-link-icone {
+    display: grid;
+    place-items: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 10px;
+    background: hsl(var(--primary) / 0.1);
+    color: hsl(var(--primary));
+  }
+
+  .folha-link-icone svg,
+  .folha-link-seta {
+    width: 18px;
+    height: 18px;
+  }
+
+  .folha-link-seta {
+    color: hsl(var(--muted-foreground));
   }
 
   /* dedo, não mouse: alvos de no mínimo 44px e sem zoom automático no iOS */

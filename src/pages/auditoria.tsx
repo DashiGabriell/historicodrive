@@ -72,9 +72,7 @@ const colunas: Array<Column<Registro>> = [
     render: (r) =>
       r.antes || r.depois ? (
         <details>
-          <summary className="cursor-pointer text-sm font-semibold text-primary">
-            Ver
-          </summary>
+          <summary className="link-acao cursor-pointer">Ver</summary>
           <div className="mt-2 grid gap-2 text-left sm:min-w-[280px]">
             {r.antes ? (
               <div>

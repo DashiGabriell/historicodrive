@@ -38,9 +38,9 @@ const MENU_LOCADORA: ItemMenu[] = [
   { href: "/painel", rotulo: "Painel", icone: "painel" },
   { href: "/busca", rotulo: "Buscar", icone: "buscar" },
   { href: "/incidente/novo", rotulo: "Registrar", icone: "registrar", destaque: true },
-  { href: "/contestacoes", rotulo: "Contestações", icone: "fila" },
-  { href: "/auditoria", rotulo: "Auditoria", icone: "auditoria" },
-  { href: "/config", rotulo: "Configurações", curto: "Ajustes", icone: "config" },
+  { href: "/contestacoes", rotulo: "Contestações", icone: "contestacao" },
+  { href: "/auditoria", rotulo: "Auditoria", icone: "auditoria", secundario: true },
+  { href: "/config", rotulo: "Configurações", icone: "config", secundario: true },
 ];
 
 const MENU_SUPERADMIN: ItemMenu[] = [
@@ -100,6 +100,9 @@ export default function App() {
         ? MENU_LOCADORA
         : [];
   const comAbas = menu.length > 1;
+  const abas = menu.filter((item) => !item.secundario);
+  const secundarios = menu.filter((item) => item.secundario);
+  const naFolha = secundarios.some((item) => local.pathname.startsWith(item.href));
 
   return (
     <div className={cx("flex flex-1 flex-col", comAbas && "com-abas")}>
@@ -190,7 +193,7 @@ export default function App() {
 
                 <button
                   type="button"
-                  className="conta-botao md:hidden"
+                  className={cx("conta-botao md:hidden", comAbas && "hidden")}
                   aria-label={`Conta de ${perfil.nome}`}
                   aria-haspopup="dialog"
                   aria-expanded={contaAberta}
@@ -249,11 +252,25 @@ export default function App() {
         </Routes>
       </main>
 
-      {comAbas ? <BarraAbas itens={menu} /> : null}
+      {comAbas ? (
+        <BarraAbas
+          itens={abas}
+          mais={
+            secundarios.length > 0
+              ? {
+                  ativa: naFolha,
+                  aberta: contaAberta,
+                  onAbrir: () => setContaAberta(true),
+                }
+              : undefined
+          }
+        />
+      ) : null}
 
       {perfil ? (
         <FolhaConta
           perfil={perfil}
+          links={secundarios}
           aberta={contaAberta}
           onFechar={() => setContaAberta(false)}
           onTrocarLocadora={(id) => {

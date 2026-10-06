@@ -12,7 +12,9 @@ function montar(elemento: React.ReactNode, rota = "/") {
   const div = document.createElement("div");
   document.body.appendChild(div);
   const raiz = createRoot(div);
-  act(() => raiz.render(<MemoryRouter initialEntries={[rota]}>{elemento}</MemoryRouter>));
+  act(() =>
+    raiz.render(<MemoryRouter initialEntries={[rota]}>{elemento}</MemoryRouter>),
+  );
   return div;
 }
 
@@ -42,6 +44,20 @@ describe("BarraAbas", () => {
     expect(div.textContent).not.toContain("Configurações");
   });
 
+  it("aba Mais abre a folha e fica ativa nas seções secundárias", () => {
+    const abrir = vi.fn();
+    const div = montar(
+      <BarraAbas itens={itens} mais={{ ativa: true, aberta: false, onAbrir: abrir }} />,
+      "/auditoria",
+    );
+    const mais = [...div.querySelectorAll("button")].find(
+      (b) => b.textContent === "Mais",
+    );
+    expect(mais?.getAttribute("aria-current")).toBe("page");
+    act(() => mais?.click());
+    expect(abrir).toHaveBeenCalledOnce();
+  });
+
   it("destaca a ação principal", () => {
     const div = montar(<BarraAbas itens={itens} />);
     const destaque = div.querySelector(".tabbar-item-destaque");
@@ -66,6 +82,24 @@ describe("FolhaConta", () => {
     expect(radios[0]?.checked).toBe(true);
     act(() => radios[1]?.click());
     expect(trocar).toHaveBeenCalledWith("b");
+  });
+
+  it("lista as seções secundárias e fecha ao navegar", () => {
+    const fechar = vi.fn();
+    const div = montar(
+      <FolhaConta
+        perfil={perfil}
+        aberta
+        links={[{ href: "/auditoria", rotulo: "Auditoria", icone: "auditoria" }]}
+        onFechar={fechar}
+        onTrocarLocadora={() => undefined}
+        onSair={() => undefined}
+      />,
+    );
+    const link = div.querySelector<HTMLAnchorElement>('a[href="/auditoria"]');
+    expect(link?.textContent).toContain("Auditoria");
+    act(() => link?.click());
+    expect(fechar).toHaveBeenCalled();
   });
 
   it("chama sair e fecha", () => {

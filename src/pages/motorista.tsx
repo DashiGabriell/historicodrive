@@ -248,10 +248,7 @@ export default function Motorista() {
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <span className="label">Prejuízo: {formatarMoeda(i.valor)}</span>
                   {i.proprio ? (
-                    <Link
-                      to={`/incidente/${i.id}`}
-                      className="text-sm font-semibold text-primary"
-                    >
+                    <Link to={`/incidente/${i.id}`} className="link-acao">
                       Abrir detalhe →
                     </Link>
                   ) : null}

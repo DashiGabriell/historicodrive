@@ -116,7 +116,7 @@ export default function Contestacoes() {
                     <EstadoBadge estado={c.estado_incidente} />
                     <Link
                       to={`/incidente/${c.incidente_id}`}
-                      className="text-sm text-primary underline"
+                      className="link-acao"
                     >
                       Ver incidente
                     </Link>

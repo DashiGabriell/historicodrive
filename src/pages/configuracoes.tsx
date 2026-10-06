@@ -178,7 +178,7 @@ function Conteudo({ locadora, onSalvo }: { locadora: Locadora; onSalvo: () => vo
               value={formatarCnpj(locadora.cnpj)}
             />
           </Field>
-          <div className="grid gap-4 sm:grid-cols-[1fr_100px]">
+          <div className="grid grid-cols-[1fr_88px] gap-3 sm:grid-cols-[1fr_100px] sm:gap-4">
             <Field label="Cidade" htmlFor="cfg-cidade">
               <input
                 id="cfg-cidade"
