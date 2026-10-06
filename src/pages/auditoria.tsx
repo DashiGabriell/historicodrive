@@ -97,7 +97,7 @@ const colunas: Array<Column<Registro>> = [
 ];
 
 export default function Auditoria() {
-  useTitulo("Auditoria · HistóricoDrive");
+  useTitulo("Auditoria · Histórico");
 
   const { perfil } = useSessao();
   const [pagina, setPagina] = useState(0);

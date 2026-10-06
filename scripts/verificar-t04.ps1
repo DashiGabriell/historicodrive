@@ -1,4 +1,4 @@
-# HistóricoDrive — verificacao das regras de dados do banco (T04).
+# Histórico — verificacao das regras de dados do banco (T04).
 # Uso: . .\scripts\supabase.ps1 ; . .\scripts\verificar-t04.ps1
 
 $e = Get-HdEnv
@@ -42,9 +42,9 @@ function Texto($x) {
   return ($x | ConvertTo-Json -Depth 8 -Compress)
 }
 
-$central = Login 'dono.central@historicodrive.app' $e['SEED_SENHA_CENTRAL']
-$vianorte = Login 'dono.vianorte@historicodrive.app' $e['SEED_SENHA_VIANORTE']
-$admin = Login 'admin@historicodrive.app' $e['SEED_SENHA_ADMIN']
+$central = Login 'dono.central@Historico.app' $e['SEED_SENHA_CENTRAL']
+$vianorte = Login 'dono.vianorte@Historico.app' $e['SEED_SENHA_VIANORTE']
+$admin = Login 'admin@Historico.app' $e['SEED_SENHA_ADMIN']
 
 Write-Host "`n[identidade e visibilidade da rede]" -ForegroundColor Cyan
 $mariaBusca = Rpc $vianorte 'buscar_motorista' @{ p_termo = 'Maria Aparecida Lima' }

@@ -1,4 +1,4 @@
--- HistóricoDrive — 0005 RPCs de painel e auditoria
+-- Histórico — 0005 RPCs de painel e auditoria
 
 create or replace function painel_kpis(p_de date, p_ate date)
 returns jsonb

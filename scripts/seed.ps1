@@ -1,4 +1,4 @@
-﻿# HistoricoDrive - seed do banco (dev/QA).
+# Historico - seed do banco (dev/QA).
 # Uso: . .\scripts\supabase.ps1 ; . .\scripts\seed.ps1
 # Idempotente: usuarios ja existentes sao aproveitados.
 # As senhas vem de .env (SEED_SENHA_*) e nunca ficam no codigo.
@@ -34,9 +34,9 @@ function Novo-Usuario {
 
 $senhas = @{}
 foreach ($par in @(
-    @('admin@historicodrive.app', 'SEED_SENHA_ADMIN'),
-    @('dono.central@historicodrive.app', 'SEED_SENHA_CENTRAL'),
-    @('dono.vianorte@historicodrive.app', 'SEED_SENHA_VIANORTE')
+    @('admin@Historico.app', 'SEED_SENHA_ADMIN'),
+    @('dono.central@Historico.app', 'SEED_SENHA_CENTRAL'),
+    @('dono.vianorte@Historico.app', 'SEED_SENHA_VIANORTE')
   )) {
   $senha = $env[$par[1]]
   if (-not $senha) { throw "$($par[1]) ausente no .env (ver .env.example)" }
@@ -47,9 +47,9 @@ $ids = @{}
 foreach ($e in $senhas.Keys) { $ids[$e] = Novo-Usuario -Email $e -Senha $senhas[$e] -Nome $e }
 "usuarios: $($ids.Count)"
 
-$admin = $ids['admin@historicodrive.app']
-$central = $ids['dono.central@historicodrive.app']
-$vianorte = $ids['dono.vianorte@historicodrive.app']
+$admin = $ids['admin@Historico.app']
+$central = $ids['dono.central@Historico.app']
+$vianorte = $ids['dono.vianorte@Historico.app']
 
 $sql = @"
 insert into perfil (id, nome, papel, locadora_ativa)
@@ -134,6 +134,9 @@ select locadora_id, criado_por, 'incidente.criar', 'incidente', id,
        jsonb_build_object('estado', estado, 'seed', true)
   from incidente where id::text like 'bbbbbbb1-%'
     and not exists (select 1 from audit_log a where a.alvo_id = incidente.id);
+
+-- reseta contestacoes de teste (idempotente antes de rodar verificar-defesa)
+delete from contestacao where incidente_id::text like 'bbbbbbb1-%';
 "@
 
 $r = Invoke-HdSql -Sql $sql

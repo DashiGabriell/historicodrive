@@ -15,7 +15,7 @@ import {
 } from "@/ui";
 
 export default function Login() {
-  useTitulo("Entrar · HistóricoDrive");
+  useTitulo("Entrar · Histórico");
 
   const { carregando, usuario, perfil, entrar, sair } = useSessao();
   const local = useLocation();
@@ -78,7 +78,7 @@ export default function Login() {
     <div className="flex flex-1 items-center justify-center bg-background px-6 py-20">
       <div className="flex w-full max-w-md flex-col gap-4">
         <Card>
-          <CardTitle>Entrar no HistóricoDrive</CardTitle>
+          <CardTitle>Entrar no Histórico</CardTitle>
           <CardDesc>Use o e-mail e a senha cadastrados na sua locadora.</CardDesc>
 
           <form className="flex flex-col gap-4" onSubmit={(e) => void enviar(e)}>

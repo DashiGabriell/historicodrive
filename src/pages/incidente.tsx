@@ -47,6 +47,8 @@ type Detalhe = {
   motivo: string | null;
   criado_em: string;
   atualizado_em: string;
+  visivel_na_rede: boolean;
+  visivel_na_rede_desde: string | null;
   criado_por_nome: string | null;
   motorista: { id: string; nome_completo: string; cpf_mascarado: string };
   anexos: Array<{
@@ -54,6 +56,15 @@ type Detalhe = {
     caminho: string;
     content_type: string | null;
     bytes: number | null;
+    hash: string | null;
+  }>;
+  contestacoes: Array<{
+    id: string;
+    estado: "aberta" | "procedente" | "improcedente";
+    aberto_em: string;
+    prazo_locadora_em: string;
+    descricao: string;
+    motivo: string | null;
   }>;
   historico: Array<{
     id: number;
@@ -66,7 +77,7 @@ type Detalhe = {
 };
 
 export default function Incidente() {
-  useTitulo("Incidente · HistóricoDrive");
+  useTitulo("Incidente · Histórico");
 
   const { id = "" } = useParams();
   const local = useLocation();
@@ -190,6 +201,31 @@ export default function Incidente() {
           : "Privado: só a sua locadora vê este registro. Para cruzar a rede ele precisa estar confirmado com confiança alta."}
       </Alert>
 
+      {inc.visivel_na_rede && inc.visivel_na_rede_desde ? (
+        <Alert variant="info">
+          <span>
+            <strong>Na rede desde {formatarDataHora(inc.visivel_na_rede_desde)}.</strong>{" "}
+            Prova de visibilidade: audit_log (incidente.confirmado + confiança alta).
+          </span>
+        </Alert>
+      ) : null}
+
+      {inc.contestacoes.length > 0 ? (
+        <Card className="flex flex-col gap-3">
+          <CardTitle>Contestações ({inc.contestacoes.length})</CardTitle>
+          <ul className="flex flex-col gap-2">
+            {inc.contestacoes.map((c) => (
+              <li key={c.id} className="text-sm">
+                <span className="label">{c.estado}</span> · aberta em{" "}
+                {formatarDataHora(c.aberto_em)} · prazo da locadora até{" "}
+                {formatarDataHora(c.prazo_locadora_em)}
+                {c.motivo ? <span className="hint"> · {c.motivo}</span> : null}
+              </li>
+            ))}
+          </ul>
+        </Card>
+      ) : null}
+
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         <div className="flex flex-col gap-6 lg:col-span-2">
           <Card className="flex flex-col gap-4">
@@ -244,6 +280,11 @@ export default function Incidente() {
                       )}
                     </a>
                     <span className="hint">{formatarBytes(a.bytes)}</span>
+                    {a.hash ? (
+                      <span className="hint truncate" title={`SHA-256: ${a.hash}`}>
+                        sha {a.hash.slice(0, 12)}…
+                      </span>
+                    ) : null}
                   </li>
                 );
               })}

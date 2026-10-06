@@ -18,6 +18,8 @@ import Auditoria from "@/pages/auditoria";
 import Busca from "@/pages/busca";
 import Cadastro from "@/pages/cadastro";
 import Configuracoes from "@/pages/configuracoes";
+import Contestacoes from "@/pages/contestacoes";
+import Contestar from "@/pages/contestar";
 import EsqueciSenha from "@/pages/esqueci-senha";
 import FilaAdmin from "@/pages/fila-admin";
 import Home from "@/pages/home";
@@ -29,12 +31,14 @@ import NotFound from "@/pages/not-found";
 import Painel from "@/pages/painel";
 import RedefinirSenha from "@/pages/redefinir-senha";
 import Styleguide from "@/pages/styleguide";
+import Termos from "@/pages/termos";
 import { Alert, Button, ButtonLink, controlClass, cx } from "@/ui";
 
 const MENU_LOCADORA: ItemMenu[] = [
   { href: "/painel", rotulo: "Painel", icone: "painel" },
   { href: "/busca", rotulo: "Buscar", icone: "buscar" },
   { href: "/incidente/novo", rotulo: "Registrar", icone: "registrar", destaque: true },
+  { href: "/contestacoes", rotulo: "Contestações", icone: "fila" },
   { href: "/auditoria", rotulo: "Auditoria", icone: "auditoria" },
   { href: "/config", rotulo: "Configurações", curto: "Ajustes", icone: "config" },
 ];
@@ -131,7 +135,7 @@ export default function App() {
                 perfil ? "inline" : "hidden sm:inline",
               )}
             >
-              Histórico<span className="text-primary">Drive</span>
+              Histórico
             </span>
           </Link>
 
@@ -226,6 +230,8 @@ export default function App() {
           <Route path="/styleguide" element={<Styleguide />} />
           <Route path="/login" element={<Login />} />
           <Route path="/cadastro" element={<Cadastro />} />
+          <Route path="/termos" element={<Termos />} />
+          <Route path="/contestar" element={<Contestar />} />
           <Route path="/esqueci-senha" element={<EsqueciSenha />} />
           <Route path="/redefinir" element={<RedefinirSenha />} />
 
@@ -236,6 +242,7 @@ export default function App() {
           <Route path="/incidente/:id" element={protegida(<Incidente />)} />
           <Route path="/config" element={protegida(<Configuracoes />)} />
           <Route path="/auditoria" element={protegida(<Auditoria />)} />
+          <Route path="/contestacoes" element={protegida(<Contestacoes />)} />
           <Route path="/admin/pendentes" element={protegida(<FilaAdmin />)} />
 
           <Route path="*" element={<NotFound />} />

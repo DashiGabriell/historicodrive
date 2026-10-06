@@ -1,4 +1,4 @@
--- HistóricoDrive — 0004 RPCs de motorista, busca e incidentes
+-- Histórico — 0004 RPCs de motorista, busca e incidentes
 -- Regras anti-marketplace (docs/adr/0001) e de identidade (0002) vivem aqui.
 
 create or replace function criar_ou_localizar_motorista(

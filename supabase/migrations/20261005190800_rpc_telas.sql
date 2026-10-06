@@ -1,4 +1,4 @@
--- HistóricoDrive — 0008 RPCs das telas de detalhe e configuracao
+-- Histórico — 0008 RPCs das telas de detalhe e configuracao
 
 -- Locadora pendente/recusada nao opera: toda RPC de negocio passa por aqui,
 -- entao ela recebe 'nenhuma locadora ativa' ate o superadmin aprovar.

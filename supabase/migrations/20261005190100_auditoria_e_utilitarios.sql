@@ -1,4 +1,4 @@
--- HistóricoDrive — 0002 auditoria e funcoes utilitarias
+-- Histórico — 0002 auditoria e funcoes utilitarias
 
 create table audit_log (
   id bigint generated always as identity primary key,

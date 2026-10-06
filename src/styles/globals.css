@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 /*
- * Design system HistóricoDrive (fonte: docs/estilo/).
+ * Design system Histórico (fonte: docs/estilo/).
  * A ordem importa: tokens.css primeiro, tokens-3d.css por cima (plástico vence).
  * Entram na camada `components` de propósito — assim os utilitários do Tailwind
  * (grid/gap/spacing, camada `utilities`) continuam vencendo as classes do ESTILO.
@@ -670,6 +670,560 @@
     main > *,
     .folha[open],
     .folha::backdrop {
+      animation: none;
+    }
+  }
+}
+
+/* =========================================================
+   Vitrine pública (/) — landing
+   ========================================================= */
+@layer components {
+  :root {
+    /* texto de apoio com contraste de corpo (>= 4.5:1 em #f8fafc) */
+    --vitrine-apoio: hsl(var(--foreground) / 0.76);
+    /* indigo legível sobre superfícies tingidas de indigo */
+    --vitrine-indigo: hsl(var(--primary-ink));
+  }
+
+  ::selection {
+    background: hsl(var(--primary) / 0.22);
+    color: hsl(var(--foreground));
+  }
+
+  .vitrine {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+  }
+
+  /* ---------- abertura ---------- */
+  .vitrine-abertura {
+    padding-top: clamp(2rem, 5vw, 4rem);
+  }
+
+  .vitrine-abertura-topo {
+    display: grid;
+    gap: 1.1rem;
+    justify-items: start;
+  }
+
+  .vitrine h1,
+  .vitrine h2 {
+    margin: 0 0 0.9rem;
+    max-width: 22ch;
+    font-size: clamp(1.7rem, 3.2vw, 2.6rem);
+    font-weight: 800;
+    line-height: 1.08;
+    letter-spacing: -0.025em;
+    text-wrap: balance;
+  }
+
+  .vitrine h3 {
+    margin: 0 0 0.35rem;
+    font-size: 1.05rem;
+    font-weight: 700;
+  }
+
+  .vitrine-titulo {
+    max-width: 16ch;
+    font-size: clamp(2.35rem, 5.6vw, 4.5rem);
+    line-height: 1.02;
+    letter-spacing: -0.03em;
+  }
+
+  .vitrine-resumo,
+  .vitrine-paragrafo {
+    margin: 0;
+    max-width: 68ch;
+    font-size: clamp(1.02rem, 1.4vw, 1.15rem);
+    line-height: 1.65;
+    color: var(--vitrine-apoio);
+  }
+
+  .vitrine-acoes {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .vitrine-nota {
+    margin: 0;
+    max-width: 62ch;
+    font-size: 0.9rem;
+    line-height: 1.55;
+    color: var(--vitrine-apoio);
+  }
+
+  /* ---------- cena ilustrada ---------- */
+  .vitrine-cena {
+    display: grid;
+    place-items: center;
+    margin: clamp(1.75rem, 4vw, 3rem) 0 0;
+    padding: clamp(1rem, 3vw, 2.5rem) 1rem;
+    border-block: 1px solid hsl(var(--border));
+    background: hsl(var(--secondary));
+  }
+
+  .vitrine-cena img {
+    display: block;
+    width: min(100%, 48rem);
+    height: auto;
+    border: 1px solid hsl(var(--border));
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-card);
+  }
+
+  /* ---------- placa de busca (demonstração) ---------- */
+  .vitrine-placa {
+    position: relative;
+    z-index: 1;
+    margin: clamp(-3rem, -4vw, -1.5rem) 0 0;
+    padding: clamp(1rem, 2.5vw, 1.5rem);
+    border: 1px solid hsl(var(--border));
+    border-radius: var(--radius);
+    background: hsl(var(--card));
+    box-shadow: var(--shadow-soft);
+  }
+
+  .vitrine-placa-ui {
+    display: grid;
+    gap: 0.9rem;
+  }
+
+  .vitrine-placa-legenda {
+    margin-top: 0.85rem;
+    font-size: 0.85rem;
+    color: var(--vitrine-apoio);
+  }
+
+  .vitrine-campo,
+  .vitrine-ui-campo {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.6rem 0.75rem;
+  }
+
+  .vitrine-campo > .label,
+  .vitrine-ui-campo > .label {
+    flex: 1 1 100%;
+  }
+
+  .vitrine-campo-valor {
+    display: flex;
+    flex: 1 1 220px;
+    align-items: center;
+    min-height: 44px;
+    letter-spacing: 0.02em;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .vitrine-caret {
+    width: 2px;
+    height: 1.15em;
+    margin-left: 2px;
+    background: hsl(var(--primary));
+    animation: vitrine-pisca 1s steps(1) infinite;
+  }
+
+  .vitrine-resultado {
+    display: flex;
+    align-items: center;
+    gap: 0.9rem;
+    padding: 0.85rem 1rem;
+    border: 1px solid hsl(var(--border));
+    border-radius: calc(var(--radius) - 4px);
+    background: hsl(var(--background));
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .vitrine-resultado-pronta {
+      animation: vitrine-sobe 0.45s cubic-bezier(0.16, 0.84, 0.44, 1) both;
+    }
+  }
+
+  @keyframes vitrine-pisca {
+    50% {
+      opacity: 0;
+    }
+  }
+
+  @keyframes vitrine-sobe {
+    from {
+      transform: translateY(10px);
+      filter: blur(3px);
+    }
+    to {
+      transform: none;
+      filter: none;
+    }
+  }
+
+  .vitrine-resultado-texto {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: 0.15rem;
+    min-width: 0;
+  }
+
+  /* ---------- seções ---------- */
+  .vitrine-secao {
+    padding-block: clamp(2.75rem, 6vw, 5rem);
+    border-top: 1px solid hsl(var(--border));
+    scroll-margin-top: calc(var(--header-h) + 1rem);
+  }
+
+  .vitrine-secao--tinta {
+    background: hsl(var(--secondary));
+  }
+
+  .vitrine-grid {
+    display: grid;
+    gap: clamp(1.75rem, 4vw, 3.25rem);
+    align-items: center;
+  }
+
+  .vitrine-texto--larga {
+    max-width: 74ch;
+    margin-bottom: clamp(1.5rem, 3vw, 2.5rem);
+  }
+
+  .vitrine-lista {
+    margin: 1.3rem 0 0;
+    padding-inline-start: 1.2rem;
+    max-width: 62ch;
+    list-style: disc;
+    line-height: 1.6;
+    color: var(--vitrine-apoio);
+  }
+
+  .vitrine-lista li + li {
+    margin-top: 0.7rem;
+  }
+
+  .vitrine-lista li::marker {
+    color: hsl(var(--primary));
+  }
+
+  .vitrine-lista strong {
+    color: hsl(var(--foreground));
+    font-weight: 700;
+  }
+
+  /* ---------- fragmentos do produto ---------- */
+  .vitrine-fragmento,
+  .vitrine-ui {
+    display: grid;
+    gap: 1rem;
+  }
+
+  .vitrine-ui-campo .input {
+    display: flex;
+    flex: 1 1 200px;
+    align-items: center;
+    min-height: 44px;
+  }
+
+  .vitrine-ui-lista {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: grid;
+    gap: 0.6rem;
+  }
+
+  .vitrine-ui-resultado {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding: 0.75rem 0.9rem;
+    border: 1px solid hsl(var(--border));
+    border-radius: calc(var(--radius) - 4px);
+    background: hsl(var(--background));
+  }
+
+  .vitrine-ui-quem {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    min-width: 0;
+  }
+
+  .vitrine-ui-nome {
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+    min-width: 0;
+  }
+
+  .vitrine-ui-topo {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0.75rem;
+  }
+
+  .vitrine-ui-topo .hint {
+    margin-bottom: 0.2rem;
+  }
+
+  .vitrine-ui-selos {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+
+  .vitrine-ui-dados {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
+    gap: 0.9rem;
+    margin: 0;
+  }
+
+  .vitrine-ui-dados dt {
+    font-size: 0.8rem;
+    color: var(--vitrine-apoio);
+  }
+
+  .vitrine-ui-dados dd {
+    margin: 0.15rem 0 0;
+    font-size: 0.95rem;
+    font-weight: 600;
+  }
+
+  .vitrine-ui-anexos {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.75rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .vitrine-ui-anexos li {
+    display: grid;
+    gap: 0.35rem;
+  }
+
+  /* ---------- fronteira da rede ---------- */
+  .vitrine-fronteira {
+    display: grid;
+    overflow: hidden;
+    border: 1px solid hsl(var(--border));
+    border-radius: var(--radius);
+    background: hsl(var(--card));
+  }
+
+  .vitrine-fronteira-lado {
+    padding: clamp(1.25rem, 3vw, 2rem);
+  }
+
+  .vitrine-fronteira-lado + .vitrine-fronteira-lado {
+    border-top: 1px solid hsl(var(--border));
+  }
+
+  .vitrine-fronteira-rede {
+    background: hsl(var(--primary) / 0.06);
+  }
+
+  .vitrine-fronteira-titulo {
+    margin: 0 0 0.9rem;
+    font-size: 1.05rem;
+    font-weight: 700;
+  }
+
+  .vitrine-fronteira-rede .vitrine-fronteira-titulo {
+    color: var(--vitrine-indigo);
+  }
+
+  .vitrine-fronteira .vitrine-lista {
+    margin-top: 0;
+  }
+
+  .vitrine-alerta {
+    margin-top: 1.25rem;
+    max-width: 80ch;
+  }
+
+  /* ---------- passos ---------- */
+  .vitrine-passos {
+    display: grid;
+    gap: clamp(1.25rem, 3vw, 2rem);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .vitrine-passo {
+    display: grid;
+    gap: 0.5rem;
+    align-content: start;
+    justify-items: start;
+  }
+
+  .vitrine-passo-num {
+    display: grid;
+    place-items: center;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: hsl(var(--primary) / 0.12);
+    color: var(--vitrine-indigo);
+    font-size: 0.95rem;
+    font-weight: 700;
+  }
+
+  .vitrine-passo p {
+    margin: 0;
+    max-width: 42ch;
+    line-height: 1.6;
+    color: var(--vitrine-apoio);
+  }
+
+  .vitrine-nota--centro {
+    max-width: none;
+    margin-top: clamp(2rem, 4vw, 3rem);
+    padding: 1rem 1.25rem;
+    border: 1px solid hsl(var(--border));
+    border-radius: var(--radius);
+    background: hsl(var(--card));
+  }
+
+  /* ---------- fechamento ---------- */
+  .vitrine-fecha {
+    border-top: 0;
+    background: hsl(var(--foreground));
+    color: hsl(var(--background));
+  }
+
+  .vitrine-fecha h2 {
+    color: hsl(var(--background));
+  }
+
+  .vitrine-fecha .vitrine-paragrafo {
+    color: hsl(var(--background) / 0.78);
+  }
+
+  .vitrine-fecha-caixa {
+    display: grid;
+    gap: 1.1rem;
+    justify-items: start;
+  }
+
+  /* ---------- rodapé ---------- */
+  .rodape {
+    padding-block: clamp(2rem, 4vw, 2.75rem) 1.25rem;
+    border-top: 1px solid hsl(var(--border));
+    background: hsl(var(--secondary));
+  }
+
+  .rodape-grade {
+    display: grid;
+    gap: 1.75rem;
+  }
+
+  .rodape-marca {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    align-items: center;
+    gap: 0.5rem 0.7rem;
+  }
+
+  .rodape-marca strong {
+    font-size: 1.05rem;
+    font-weight: 700;
+  }
+
+  .rodape-marca p {
+    grid-column: 1 / -1;
+    margin: 0.4rem 0 0;
+    max-width: 46ch;
+    font-size: 0.925rem;
+    line-height: 1.6;
+    color: var(--vitrine-apoio);
+  }
+
+  .rodape-titulo {
+    margin: 0 0 0.7rem;
+    font-size: 0.95rem;
+    font-weight: 700;
+  }
+
+  .rodape ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: grid;
+    gap: 0.5rem;
+  }
+
+  .rodape a {
+    font-size: 0.95rem;
+    color: var(--vitrine-apoio);
+    text-decoration: none;
+  }
+
+  .rodape a:hover {
+    color: hsl(var(--foreground));
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  .rodape-base {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 0.5rem 1.5rem;
+    margin-top: 2rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid hsl(var(--border));
+    font-size: 0.85rem;
+    color: var(--vitrine-apoio);
+  }
+
+  @media (min-width: 48rem) {
+    .rodape-grade {
+      grid-template-columns: 2fr 1fr 1fr;
+      gap: 2rem;
+    }
+  }
+
+  @media (min-width: 52rem) {
+    .vitrine-passos {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .vitrine-fronteira {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .vitrine-fronteira-lado + .vitrine-fronteira-lado {
+      border-top: 0;
+      border-left: 1px solid hsl(var(--border));
+    }
+  }
+
+  @media (min-width: 60rem) {
+    .vitrine-grid {
+      grid-template-columns: 5fr 7fr;
+    }
+
+    .vitrine-grid--invertida {
+      grid-template-columns: 7fr 5fr;
+    }
+
+    .vitrine-grid--invertida .vitrine-texto {
+      order: 2;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .vitrine-caret {
       animation: none;
     }
   }

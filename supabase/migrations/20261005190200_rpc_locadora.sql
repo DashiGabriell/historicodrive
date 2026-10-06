@@ -1,4 +1,4 @@
--- HistóricoDrive — 0003 RPCs de cadastro, perfil e locadora
+-- Histórico — 0003 RPCs de cadastro, perfil e locadora
 
 -- Chamada logo apos o signUp. So exige sessao: o perfil ainda nao existe.
 create or replace function solicitar_cadastro(

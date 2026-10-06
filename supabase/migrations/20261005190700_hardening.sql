@@ -1,4 +1,4 @@
--- HistóricoDrive — 0007 hardening (ADR 0003)
+-- Histórico — 0007 hardening (ADR 0003)
 -- Nenhuma leitura/escrita direta de tabela pelo PostgREST. Tudo via RPC.
 
 -- 1. RLS ligado em toda tabela de negocio

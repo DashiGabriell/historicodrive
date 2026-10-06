@@ -1,4 +1,4 @@
--- HistóricoDrive — 0006 storage privado (bucket anexos)
+-- Histórico — 0006 storage privado (bucket anexos)
 -- Nunca public: anexo nunca cruza a rede (docs/adr/0001).
 -- Caminho: {locadora_id}/rascunho/{arquivo} e {locadora_id}/{incidente_id}/{arquivo}
 

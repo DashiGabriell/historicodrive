@@ -94,12 +94,12 @@ function Titulo({ children, id }: { children: string; id: string }) {
 }
 
 export default function StyleguidePage() {
-  useTitulo("Design system — HistóricoDrive");
+  useTitulo("Design system — Histórico");
 
   return (
     <div className="mx-auto w-full max-w-5xl px-4 py-12">
       <header className="mb-10">
-        <p className="eyebrow">HistóricoDrive</p>
+        <p className="eyebrow">Histórico</p>
         <h1 className="text-3xl font-extrabold tracking-tight">Design system</h1>
         <p className="mt-2 max-w-2xl" style={{ color: "hsl(var(--muted-foreground))" }}>
           Fonte única do visual: <code>docs/estilo/tokens.css</code> seguido de{" "}

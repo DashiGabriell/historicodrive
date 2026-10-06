@@ -29,7 +29,7 @@ type Busca =
   | { tipo: "nome"; nome: string; resultados: Resultado[] };
 
 export default function BuscaMotorista() {
-  useTitulo("Busca no balcão · HistóricoDrive");
+  useTitulo("Busca no balcão · Histórico");
 
   const navegar = useNavigate();
   const [termo, setTermo] = useState("");

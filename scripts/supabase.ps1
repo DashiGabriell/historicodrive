@@ -1,4 +1,4 @@
-# Helper da API Supabase do HistoricoDrive (PowerShell 5.1).
+# Helper da API Supabase do Historico (PowerShell 5.1).
 # Uso:  . .\scripts\supabase.ps1 ; Invoke-HdSql "select 1"
 
 $script:HdRef = "alrplsstgjahwawtnbmt"

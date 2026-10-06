@@ -81,8 +81,8 @@ export default function Motorista() {
 
   useTitulo(
     ficha.dados
-      ? `${ficha.dados.motorista.nome_completo} · HistóricoDrive`
-      : "Ficha do motorista · HistóricoDrive",
+      ? `${ficha.dados.motorista.nome_completo} · Histórico`
+      : "Ficha do motorista · Histórico",
   );
 
   function confirmarCpf(evento: FormEvent) {

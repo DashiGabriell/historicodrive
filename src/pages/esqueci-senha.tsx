@@ -13,7 +13,7 @@ import {
 } from "@/ui";
 
 export default function EsqueciSenha() {
-  useTitulo("Recuperar senha · HistóricoDrive");
+  useTitulo("Recuperar senha · Histórico");
 
   const { esqueciSenha } = useSessao();
   const [email, setEmail] = useState("");

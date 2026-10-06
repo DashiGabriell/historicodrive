@@ -1,4 +1,4 @@
-# HistóricoDrive
+# Histórico
 
 Plataforma interna para **registrar e consultar o histórico de incidentes de motoristas** em locadoras de veículos pequenas. O produto responde a uma pergunta de balcão, em menos de 5 segundos: _esse motorista já gerou prejuízo para alguém?_
 
@@ -59,4 +59,10 @@ para devolver os dados ao estado inicial.
 | [`docs/adr/0001-rede-visibilidade.md`](docs/adr/0001-rede-visibilidade.md)   | o que a rede enxerga + regra anti-marketplace           |
 | [`docs/adr/0002-identidade-por-cpf.md`](docs/adr/0002-identidade-por-cpf.md) | identidade única por CPF e busca por nome               |
 | [`docs/adr/0003-stack-sem-orm.md`](docs/adr/0003-stack-sem-orm.md)           | supabase-js direto e leitura via RPC `security definer` |
+| [`docs/adr/0004-postura-legal-papeis.md`](docs/adr/0004-postura-legal-papeis.md) | papéis LGPD: locadora=controladora, dev=operador     |
+| [`docs/adr/0005-base-legal-lgpd.md`](docs/adr/0005-base-legal-lgpd.md)       | base legal, retenção e salvaguardas                     |
+| [`docs/juridico/`](docs/juridico/)                                           | rascunhos jurídicos + playbook de intimação             |
+| [`docs/spec-defesa-legal.md`](docs/spec-defesa-legal.md)                     | spec da prova/contestação (fase 1 da defesa)            |
 | [`docs/estilo/`](docs/estilo/)                                               | design system base (tokens, catálogo, landing)          |
+
+> Docs em `docs/juridico/` e as ADRs 0004–0005 são **rascunhos para advogado**, não parecer. O código da defesa segue os tickets em [`.scratch/defesa-legal/`](.scratch/defesa-legal/).

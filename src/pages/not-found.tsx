@@ -2,7 +2,7 @@ import { ButtonLink, EmptyState } from "@/ui";
 import { useTitulo } from "@/lib/use-titulo";
 
 export default function NotFound() {
-  useTitulo("Página não encontrada — HistóricoDrive");
+  useTitulo("Página não encontrada — Histórico");
 
   return (
     <div className="flex flex-1 items-center justify-center bg-background px-6 py-20">

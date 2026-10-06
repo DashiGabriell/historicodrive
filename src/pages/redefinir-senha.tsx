@@ -14,7 +14,7 @@ import {
 } from "@/ui";
 
 export default function RedefinirSenha() {
-  useTitulo("Criar senha nova · HistóricoDrive");
+  useTitulo("Criar senha nova · Histórico");
 
   const { carregando, usuario, perfil, trocarSenha } = useSessao();
   const [senha, setSenha] = useState("");

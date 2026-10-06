@@ -7,6 +7,7 @@ import {
   type Perfil,
 } from "./sessao-contexto";
 import { supabase } from "./supabase";
+import { TERMOS_VERSAO } from "./termos";
 
 /** Sessao de 7 dias: o Supabase so permite configurar timebox em plano Pro,
  *  entao o limite fica no cliente. */
@@ -56,6 +57,8 @@ async function concluirCadastroPendente(): Promise<boolean> {
         p_uf: pedido.uf,
         p_email_contato: pedido.email_contato,
         p_nome_dono: pedido.nome_dono,
+        p_aceitou_termos: pedido.aceitou_termos === true,
+        p_termos_versao: TERMOS_VERSAO,
       }),
     ).then(({ error }) => {
       if (error) pedidosDeCadastro.delete(conta.id);

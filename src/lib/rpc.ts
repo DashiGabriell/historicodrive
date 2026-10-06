@@ -23,6 +23,13 @@ const TRADUCOES: Array<[RegExp, string]> = [
   [/transicao .* nao permitida/, "Essa mudança de estado não é permitida."],
   [/estado ja e/, "O incidente já está nesse estado."],
   [/recusa exige motivo/, "A recusa exige um motivo (ao menos 5 caracteres)."],
+  [/decisao exige motivo/, "A decisão exige um motivo (ao menos 5 caracteres)."],
+  [/aceite dos termos obrigatorio/, "Aceite os Termos de uso para continuar."],
+  [/versao dos termos obrigatoria|versao dos termos invalida/, "Versão dos Termos inválida. Recarregue a página."],
+  [/ja existe contestacao aberta/, "Já existe uma contestação aberta para este incidente."],
+  [/contestacao ja decidida/, "Esta contestação já foi decidida."],
+  [/recurso so apos o prazo/, "O recurso só vale depois do prazo da locadora."],
+  [/registro nao encontrado ou dados invalidos/, "CPF não confere com nenhum registro. Confira os 11 dígitos."],
   [/periodo invalido/, "Período inválido: a data inicial vem depois da final."],
   [/locadora_cnpj_uniq|duplicate key.*cnpj/, "Já existe uma locadora com este CNPJ."],
 ];

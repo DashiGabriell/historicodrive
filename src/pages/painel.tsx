@@ -15,6 +15,7 @@ import { useSessao } from "@/lib/sessao-contexto";
 import { useCarga } from "@/lib/use-carga";
 import { useTitulo } from "@/lib/use-titulo";
 import {
+  Button,
   ButtonLink,
   Card,
   CardDesc,
@@ -52,6 +53,16 @@ type IncidenteResumo = {
   confianca: Confianca;
   criado_em: string;
   tem_anexo: boolean;
+};
+
+type Notificacao = {
+  id: string;
+  tipo: string;
+  titulo: string;
+  corpo: string | null;
+  incidente_id: string | null;
+  lida: boolean;
+  criado_em: string;
 };
 
 const NOME_MES = new Intl.DateTimeFormat("pt-BR", { month: "short", year: "2-digit" });
@@ -112,7 +123,7 @@ const colunas: Array<Column<IncidenteResumo>> = [
 ];
 
 export default function Painel() {
-  useTitulo("Painel · HistóricoDrive");
+  useTitulo("Painel · Histórico");
 
   const { perfil } = useSessao();
   const locadora = perfil?.locadoras.find((l) => l.id === perfil.locadora_ativa);
@@ -125,6 +136,18 @@ export default function Painel() {
   const recentes = useCarga(`recentes:${perfil?.locadora_ativa}`, () =>
     rpc<IncidenteResumo[]>("listar_incidentes", { p_limite: 10 }),
   );
+  const notificacoes = useCarga(`notif:${perfil?.locadora_ativa}`, () =>
+    rpc<Notificacao[]>("listar_notificacoes", { p_limite: 8 }),
+  );
+
+  async function marcarLida(n: Notificacao) {
+    try {
+      await rpc("marcar_notificacao_lida", { p_notificacao_id: n.id });
+      notificacoes.recarregar();
+    } catch {
+      /* falha silenciosa: alerta e so um atalho */
+    }
+  }
 
   const k = kpis.dados;
   const meses = k ? mesesDoPeriodo(k.periodo.de, k.periodo.ate, k.por_mes) : [];
@@ -197,6 +220,38 @@ export default function Painel() {
       </Card>
 
       {kpis.erro ? <ErroCarga mensagem={kpis.erro} onTentar={kpis.recarregar} /> : null}
+
+      {notificacoes.dados && notificacoes.dados.some((n) => !n.lida) ? (
+        <Card className="flex flex-col gap-3">
+          <CardTitle>Alertas</CardTitle>
+          <ul className="flex flex-col gap-2">
+            {notificacoes.dados
+              .filter((n) => !n.lida)
+              .map((n) => (
+                <li
+                  key={n.id}
+                  className="flex flex-wrap items-start justify-between gap-3 text-sm"
+                >
+                  <div className="min-w-0">
+                    <p className="label">
+                      {n.incidente_id ? (
+                        <Link to={`/incidente/${n.incidente_id}`} className="text-primary">
+                          {n.titulo}
+                        </Link>
+                      ) : (
+                        n.titulo
+                      )}
+                    </p>
+                    {n.corpo ? <p className="hint">{n.corpo}</p> : null}
+                  </div>
+                  <Button variant="ghost" size="sm" onClick={() => void marcarLida(n)}>
+                    Marcar lida
+                  </Button>
+                </li>
+              ))}
+          </ul>
+        </Card>
+      ) : null}
 
       {!k && kpis.carregando ? (
         <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">

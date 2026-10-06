@@ -11,12 +11,13 @@
   --card-foreground: 222 47% 11%;
   --popover: 0 0% 100%;
   --popover-foreground: 222 47% 11%;
-  --primary: 239 84% 67%;
+  --primary: 239 84% 66%;
   --primary-foreground: 0 0% 100%;
+  --primary-ink: 239 65% 45%;
   --secondary: 210 20% 96%;
   --secondary-foreground: 222 47% 11%;
   --muted: 210 20% 96%;
-  --muted-foreground: 215 16% 47%;
+  --muted-foreground: 215 16% 43%;
   --accent: 239 84% 67%;
   --accent-foreground: 0 0% 100%;
   --destructive: 0 84% 60%;
@@ -259,7 +260,7 @@ textarea {
 
 .badge-primary {
   background: hsl(var(--primary) / 0.12);
-  color: hsl(var(--primary));
+  color: hsl(var(--primary-ink));
 }
 
 .badge-secondary {
@@ -457,7 +458,7 @@ textarea {
   display: grid;
   place-items: center;
   background: hsl(var(--primary) / 0.12);
-  color: hsl(var(--primary));
+  color: hsl(var(--primary-ink));
   font-weight: 700;
   font-size: 0.85rem;
   overflow: hidden;

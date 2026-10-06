@@ -1,5 +1,5 @@
 /*
- * Service worker do HistóricoDrive.
+ * Service worker do Histórico.
  * Guarda só o "casco" do app (HTML, JS/CSS com hash, ícones e fontes) para abrir
  * instantâneo e funcionar sem rede. Dados (Supabase) nunca passam pelo cache:
  * qualquer requisição de outra origem que não seja fonte segue direto para a rede.

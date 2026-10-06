@@ -1,9 +1,10 @@
 import { useState, type FormEvent } from "react";
-import { Navigate } from "react-router-dom";
+import { Link, Navigate } from "react-router-dom";
 import { rotaInicial } from "@/lib/permissao";
 import { somenteDigitos } from "@/lib/dominio";
 import { mensagemDe } from "@/lib/rpc";
 import { useSessao } from "@/lib/sessao-contexto";
+import { TERMOS_VERSAO } from "@/lib/termos";
 import { useTitulo } from "@/lib/use-titulo";
 import {
   Alert,
@@ -17,7 +18,7 @@ import {
 } from "@/ui";
 
 export default function Cadastro() {
-  useTitulo("Cadastrar locadora · HistóricoDrive");
+  useTitulo("Cadastrar locadora · Histórico");
 
   const { carregando, perfil, cadastrar } = useSessao();
   const [form, setForm] = useState({
@@ -29,6 +30,7 @@ export default function Cadastro() {
     nomeDono: "",
     email: "",
     senha: "",
+    aceitouTermos: false,
   });
   const [erro, setErro] = useState<string | null>(null);
   const [enviando, setEnviando] = useState(false);
@@ -38,7 +40,7 @@ export default function Cadastro() {
     return <Navigate to={rotaInicial(perfil.papel)} replace />;
   }
 
-  function campo(nome: keyof typeof form) {
+  function campo(nome: Exclude<keyof typeof form, "aceitouTermos">) {
     return {
       value: form[nome],
       onChange: (e: { target: { value: string } }) =>
@@ -60,6 +62,8 @@ export default function Cadastro() {
     if (form.nomeDono.trim().length < 3) return setErro("Informe o seu nome.");
     if (form.senha.length < 8)
       return setErro("A senha precisa de ao menos 8 caracteres.");
+    if (!form.aceitouTermos)
+      return setErro("Aceite os Termos de uso para pedir acesso.");
 
     setEnviando(true);
     try {
@@ -70,6 +74,7 @@ export default function Cadastro() {
         uf: form.uf.trim().toUpperCase() || null,
         email_contato: (form.emailContato || form.email).trim(),
         nome_dono: form.nomeDono.trim(),
+        aceitou_termos: form.aceitouTermos,
       });
       if (!comSessao) setAguardandoEmail(true);
     } catch (causa) {
@@ -195,6 +200,24 @@ export default function Cadastro() {
                 />
               </Field>
             </fieldset>
+
+            <label className="flex items-start gap-3 text-sm">
+              <input
+                type="checkbox"
+                className="mt-1"
+                checked={form.aceitouTermos}
+                onChange={(e) =>
+                  setForm((f) => ({ ...f, aceitouTermos: e.target.checked }))
+                }
+              />
+              <span>
+                Li e aceito os{" "}
+                <Link to="/termos" className="text-primary underline">
+                  Termos de uso (v{TERMOS_VERSAO})
+                </Link>
+                .
+              </span>
+            </label>
 
             {erro ? <Alert variant="destructive">{erro}</Alert> : null}
 

@@ -10,7 +10,16 @@ export type PerfilResumo = {
  *  | pendente: dono cuja locadora ativa ainda nao foi aprovada */
 export type Acesso = "publico" | "login" | "negado" | "pendente" | "ok";
 
-const PUBLICAS = ["/", "/login", "/cadastro", "/esqueci-senha", "/redefinir", "/styleguide"];
+const PUBLICAS = [
+  "/",
+  "/login",
+  "/cadastro",
+  "/esqueci-senha",
+  "/redefinir",
+  "/styleguide",
+  "/termos",
+  "/contestar",
+];
 
 const ROTAS_LOCADORA = [
   "/painel",
@@ -19,6 +28,7 @@ const ROTAS_LOCADORA = [
   "/incidente",
   "/config",
   "/auditoria",
+  "/contestacoes",
 ];
 
 export function acessoPara(caminho: string, perfil: PerfilResumo | null): Acesso {

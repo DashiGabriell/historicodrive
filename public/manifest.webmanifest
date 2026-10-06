@@ -1,7 +1,7 @@
 {
   "id": "/",
-  "name": "HistóricoDrive",
-  "short_name": "HistóricoDrive",
+  "name": "Histórico",
+  "short_name": "Histórico",
   "description": "Registre e consulte o histórico de incidentes de motoristas da sua locadora.",
   "lang": "pt-BR",
   "dir": "ltr",

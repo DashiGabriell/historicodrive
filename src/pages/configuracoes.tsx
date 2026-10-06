@@ -32,7 +32,7 @@ type Locadora = {
 };
 
 export default function Configuracoes() {
-  useTitulo("Configurações · HistóricoDrive");
+  useTitulo("Configurações · Histórico");
   const { perfil } = useSessao();
   const dados = useCarga(`config:${perfil?.locadora_ativa}`, () =>
     rpc<Locadora>("minha_locadora_dados"),

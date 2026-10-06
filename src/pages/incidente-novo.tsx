@@ -1,6 +1,7 @@
 import { useEffect, useState, type ChangeEvent, type FormEvent } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import {
+  FORMATO_HASH,
   TAMANHO_MAXIMO,
   TIPOS_ACEITOS,
   eImagem,
@@ -83,6 +84,8 @@ function rascunhoInicial(locadoraId: string, origem: Origem): Rascunho {
   }
 
   const base = { ...vazio, ...salvo };
+  // rascunho antigo sem hash (prova de integridade) nao sobrevive ao envio
+  base.anexos = (base.anexos ?? []).filter((a) => a?.hash && FORMATO_HASH.test(a.hash));
   if (origem?.motorista) return { ...base, motorista: origem.motorista };
   if (origem?.cpf) return { ...base, motorista: null, cpf: formatarCpf(origem.cpf) };
   if (origem?.nome) return { ...base, motorista: null, nome: origem.nome };
@@ -90,7 +93,7 @@ function rascunhoInicial(locadoraId: string, origem: Origem): Rascunho {
 }
 
 export default function IncidenteNovo() {
-  useTitulo("Registrar incidente · HistóricoDrive");
+  useTitulo("Registrar incidente · Histórico");
   const { perfil } = useSessao();
   const locadoraId = perfil?.locadora_ativa;
   if (!locadoraId) return null;
@@ -159,6 +162,8 @@ function Formulario({ locadoraId }: { locadoraId: string }) {
 
   function validar(): string | null {
     if (r.anexos.length < 1) return "Envie ao menos uma foto ou documento.";
+    if (r.anexos.some((a) => !a.hash || !FORMATO_HASH.test(a.hash)))
+      return "Um dos anexos está sem a prova de integridade. Envie os arquivos de novo.";
     if (!r.motorista) {
       if (!cpfValido(r.cpf)) return "CPF do motorista inválido.";
       if (r.nome.trim().length < 5 || r.nome.trim().split(/\s+/).length < 2) {
@@ -197,10 +202,11 @@ function Formulario({ locadoraId }: { locadoraId: string }) {
         p_descricao: r.descricao.trim(),
         p_valor: r.valor === "" ? null : Number(r.valor),
         p_confianca: r.confianca,
-        p_anexos: r.anexos.map(({ caminho, content_type, bytes }) => ({
+        p_anexos: r.anexos.map(({ caminho, content_type, bytes, hash }) => ({
           caminho,
           content_type,
           bytes,
+          hash,
         })),
       });
 

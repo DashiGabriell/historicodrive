@@ -1,4 +1,4 @@
-# HistóricoDrive — aplica as migrations de supabase/migrations/ no projeto remoto.
+# Histórico — aplica as migrations de supabase/migrations/ no projeto remoto.
 # Cada arquivo e aplicado uma unica vez; o controle fica em
 # public._migrations_aplicadas no proprio banco.
 # Uso: . .\scripts\supabase.ps1 ; . .\scripts\aplicar-migrations.ps1

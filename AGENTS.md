@@ -14,6 +14,11 @@
   (a variante plástica vence). Tailwind é usado **só para layout**.
 - Banco: `supabase/migrations/` aplicados por `scripts/aplicar-migrations.ps1`;
   seed em `scripts/seed.ps1`; checagens de regra em `scripts/verificar-t04.ps1`
-  (alteram dados: rode o seed antes de repetir).
+  e da defesa legal em `scripts/verificar-defesa.ps1` (alteram dados: rode o
+  seed antes de repetir).
 - Todo acesso ao banco é por RPC `SECURITY DEFINER` (ver `docs/adr/0003-stack-sem-orm.md`).
   Nenhuma leitura direta de tabela pelo cliente.
+- Defesa legal / prova: ADR 0004–0005, `docs/juridico/` (rascunhos p/ advogado) e
+  spec em `docs/spec-defesa-legal.md`. Tickets em `.scratch/defesa-legal/issues/`.
+  Nova RPC de leitura **não** pode devolver `motorista`/`incidente` para `superadmin`.
+  Fluxos públicos (sem login): `/termos`, `/contestar` (contestação por CPF).

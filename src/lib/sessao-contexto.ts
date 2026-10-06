@@ -23,6 +23,7 @@ export type DadosCadastro = {
   uf: string | null;
   email_contato: string;
   nome_dono: string;
+  aceitou_termos: boolean;
 };
 
 export type ContextoSessao = {

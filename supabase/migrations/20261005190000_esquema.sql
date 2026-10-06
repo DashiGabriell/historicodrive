@@ -1,4 +1,4 @@
--- HistóricoDrive — 0001 esquema base
+-- Histórico — 0001 esquema base
 -- Fonte de verdade do domínio: docs/GLOSSARY.md e docs/adr/.
 -- Postura: RLS ligado em tudo e nenhum policy de select comum.
 -- Leitura/escrita de negocio acontece so via RPC SECURITY DEFINER (ADR 0003).
