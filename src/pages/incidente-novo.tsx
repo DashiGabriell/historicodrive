@@ -23,6 +23,7 @@ import {
   type Confianca,
   type TipoIncidente,
 } from "@/lib/dominio";
+import { apagarRascunho, lerRascunho, salvarRascunho } from "@/lib/rascunho";
 import { mensagemDe, rpc } from "@/lib/rpc";
 import { useSessao } from "@/lib/sessao-contexto";
 import { useCarga } from "@/lib/use-carga";
@@ -59,8 +60,6 @@ type Origem = {
   motorista?: { id: string; nome: string };
 } | null;
 
-const chaveRascunho = (locadoraId: string) => `hd.rascunho.${locadoraId}`;
-
 function rascunhoInicial(locadoraId: string, origem: Origem): Rascunho {
   const vazio: Rascunho = {
     passo: 1,
@@ -76,13 +75,7 @@ function rascunhoInicial(locadoraId: string, origem: Origem): Rascunho {
     descricao: "",
   };
 
-  let salvo: Partial<Rascunho> = {};
-  try {
-    salvo = JSON.parse(localStorage.getItem(chaveRascunho(locadoraId)) ?? "{}");
-  } catch {
-    salvo = {};
-  }
-
+  const salvo = lerRascunho(locadoraId) as Partial<Rascunho>;
   const base = { ...vazio, ...salvo };
   // rascunho antigo sem hash (prova de integridade) nao sobrevive ao envio
   base.anexos = (base.anexos ?? []).filter((a) => a?.hash && FORMATO_HASH.test(a.hash));
@@ -110,7 +103,7 @@ function Formulario({ locadoraId }: { locadoraId: string }) {
   const [salvando, setSalvando] = useState(false);
 
   useEffect(() => {
-    localStorage.setItem(chaveRascunho(locadoraId), JSON.stringify(r));
+    salvarRascunho(locadoraId, r);
   }, [locadoraId, r]);
 
   const caminhos = r.anexos.map((a) => a.caminho);
@@ -169,6 +162,7 @@ function Formulario({ locadoraId }: { locadoraId: string }) {
       if (r.nome.trim().length < 5 || r.nome.trim().split(/\s+/).length < 2) {
         return "Informe o nome completo do motorista.";
       }
+      if (!r.nascimento) return "Informe a data de nascimento do motorista.";
     }
     if (!placaValida(r.placa)) return "Placa inválida. Use ABC-1234 ou ABC1D23.";
     if (r.valor !== "" && (Number.isNaN(Number(r.valor)) || Number(r.valor) < 0)) {
@@ -210,7 +204,7 @@ function Formulario({ locadoraId }: { locadoraId: string }) {
         })),
       });
 
-      localStorage.removeItem(chaveRascunho(locadoraId));
+      apagarRascunho(locadoraId);
       navegar(`/incidente/${id}`, { replace: true, state: { criado: true } });
     } catch (causa) {
       setErro(mensagemDe(causa, "Não foi possível registrar o incidente."));
@@ -220,7 +214,7 @@ function Formulario({ locadoraId }: { locadoraId: string }) {
 
   async function descartar() {
     const anexos = r.anexos;
-    localStorage.removeItem(chaveRascunho(locadoraId));
+    apagarRascunho(locadoraId);
     setR(rascunhoInicial(locadoraId, null));
     await Promise.all(anexos.map((a) => removerAnexo(a.caminho)));
   }
@@ -373,10 +367,16 @@ function Formulario({ locadoraId }: { locadoraId: string }) {
                     onChange={(e) => atualizar("cpf", formatarCpf(e.target.value))}
                   />
                 </Field>
-                <Field label="Data de nascimento" htmlFor="nascimento">
+                <Field
+                  label="Data de nascimento"
+                  htmlFor="nascimento"
+                  hint="Como na CNH. O motorista usa para contestar."
+                  required
+                >
                   <input
                     id="nascimento"
                     type="date"
+                    max={new Date().toISOString().slice(0, 10)}
                     className={controlClass("input")}
                     value={r.nascimento}
                     onChange={(e) => atualizar("nascimento", e.target.value)}

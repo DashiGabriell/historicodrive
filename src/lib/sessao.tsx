@@ -6,6 +6,7 @@ import {
   type DadosCadastro,
   type Perfil,
 } from "./sessao-contexto";
+import { limparRascunhos } from "./rascunho";
 import { supabase } from "./supabase";
 import { TERMOS_VERSAO } from "./termos";
 
@@ -111,6 +112,7 @@ export function SessaoProvider({ children }: { children: ReactNode }) {
       if (data.session && sessaoExpirada()) {
         await supabase.auth.signOut();
         localStorage.removeItem(CHAVE_INICIO);
+        limparRascunhos();
         setCarregando(false);
         return;
       }
@@ -134,6 +136,7 @@ export function SessaoProvider({ children }: { children: ReactNode }) {
 
         if (evento === "SIGNED_OUT") {
           localStorage.removeItem(CHAVE_INICIO);
+          limparRascunhos();
           setPerfil(null);
           return;
         }
@@ -182,6 +185,7 @@ export function SessaoProvider({ children }: { children: ReactNode }) {
   );
 
   const sair = useCallback(async () => {
+    limparRascunhos();
     await supabase.auth.signOut();
   }, []);
 

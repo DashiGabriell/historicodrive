@@ -47,16 +47,17 @@
 
 ## 6. Retenção (resumo — ver ADR 0005)
 
-- `suspeita` não confirmada: **purge em 30 dias**.
-- `confirmado`: **retenção indefinida** com justificativa de prova/direito; revisão da política em ciclos anuais.
-- Auditoria e consultas: mantidas pelo prazo operacional de prova.
+- `suspeita` não confirmada: **purge automático em 30 dias**.
+- `confirmado`/`contestado`: **purge automático em 5 anos** contados do registro, com anexos e contestações.
+- Ficha de motorista sem incidente: apagada.
+- Auditoria e consultas: mantidas pelo prazo operacional de prova, minimizadas no expurgo (sem placa, descrição nem identificação do motorista).
 - Solicitações de eliminação: avaliadas com a controladora (locadora dona), ressalvadas obrigações legais de guarda.
 
 ## 7. Direitos do titular (motorista)
 
 Nos termos da LGPD e da versão jurídica final:
 
-1. **Contestar** incidentes pelo canal público com verificação de CPF.
+1. **Contestar** incidentes pelo canal público com verificação de CPF e data de nascimento (tentativas limitadas).
 2. Solicitar **informação** sobre tratamento de seus dados.
 3. Solicitar **correção** de dados incompletos/incorretos junto à locadora dona do registro.
 4. Solicitar **eliminação** quando cabível, com registro e sem prejuízo de retenção legal/legítima.
@@ -74,6 +75,7 @@ Nos termos da LGPD e da versão jurídica final:
 ## 9. Cookies e armazenamento local
 
 - Autenticação e sessão usam cookies/`localStorage` do Supabase Auth, necessários ao funcionamento.
+- O rascunho de incidente fica em `sessionStorage` (some ao fechar a aba) e é apagado no logout.
 - Sem cookies de publicidade.
 
 ## 10. Alterações

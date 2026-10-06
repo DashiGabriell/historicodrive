@@ -1,4 +1,4 @@
-export const TERMOS_VERSAO = "1.0";
+export const TERMOS_VERSAO = "1.1";
 
 export const TERMOS_TITULO = "Termos de uso — locadoras";
 
@@ -21,12 +21,12 @@ export const TERMOS_RESUMO: Array<{ titulo: string; texto: string }> = [
   {
     titulo: "Retenção e purge",
     texto:
-      "Incidentes em suspeita que não forem confirmados em 30 dias podem ser apagados (purge). Registros confirmados e contestações ficam retidos conforme a necessidade de prova e defesa legal.",
+      "Incidentes em suspeita não confirmados em 30 dias são apagados automaticamente. Registros confirmados ou contestados são apagados 5 anos após o registro, com seus anexos e contestações. A trilha de auditoria guarda só o fato (ação, data, autor), sem placa, descrição nem dados do motorista.",
   },
   {
     titulo: "Contestação pelo titular",
     texto:
-      "O motorista pode contestar um incidente em /contestar com verificação de CPF. A contestação suspende a visibilidade na rede até a decisão da locadora (15 dias úteis) ou do superadmin (recurso).",
+      "O motorista pode contestar em /contestar confirmando CPF e data de nascimento (por isso a data é obrigatória no cadastro do motorista). A contestação suspende a visibilidade na rede até a decisão da locadora (15 dias úteis) ou do superadmin (recurso). Contestação julgada improcedente não reabre pelo canal público.",
   },
   {
     titulo: "Prova e auditoria",

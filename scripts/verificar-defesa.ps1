@@ -148,24 +148,48 @@ Ok "purge roda como superadmin" ($purgeAdmin -match '^[0-9]+$') $purgeAdmin
 Write-Host "`n[T08 consulta publica de contestacao (anon)]" -ForegroundColor Cyan
 $anon = @{ access_token = $pub }
 $cpfMaria = '52998224725'
-$consultaAnon = Texto (Rpc $anon 'consultar_ficha_contestacao' @{ p_cpf = $cpfMaria })
-Ok "anon ve que ha ficha" ($consultaAnon -match '"existe":true' -and $consultaAnon -match 'bbbbbbb1-0000-4000-8000-000000000004') $consultaAnon.Substring(0, [Math]::Min(120, $consultaAnon.Length))
+$nascMaria = '1993-07-21'
 
-$consultaErrada = Texto (Rpc $anon 'consultar_ficha_contestacao' @{ p_cpf = '00000000000' })
+$soCpf = Texto (Rpc $anon 'consultar_ficha_contestacao' @{ p_cpf = $cpfMaria; p_nascimento = $null })
+Ok "so o CPF nao revela ficha" ($soCpf -match '"existe":false') $soCpf
+
+$nascErrado = Texto (Rpc $anon 'consultar_ficha_contestacao' @{ p_cpf = $cpfMaria; p_nascimento = '1990-01-01' })
+Ok "nascimento errado nao revela ficha" ($nascErrado -match '"existe":false') $nascErrado
+
+$consultaAnon = Texto (Rpc $anon 'consultar_ficha_contestacao' @{ p_cpf = $cpfMaria; p_nascimento = $nascMaria })
+Ok "CPF + nascimento confirmam ficha contestavel" ($consultaAnon -match '"existe":true' -and $consultaAnon -match '"contestavel":true') $consultaAnon
+Ok "consulta nao lista incidente nem locadora" ($consultaAnon -notmatch 'bbbbbbb1|locadora|incidentes') $consultaAnon
+
+$consultaErrada = Texto (Rpc $anon 'consultar_ficha_contestacao' @{ p_cpf = '00000000000'; p_nascimento = $nascMaria })
 Ok "CPF inexistente e generico" ($consultaErrada -match '"existe":false') $consultaErrada
+
+Write-Host "`n[T08 limite de tentativas no canal publico]" -ForegroundColor Cyan
+$cpfFicticio = '11122233344'
+1..5 | ForEach-Object { Rpc $anon 'consultar_ficha_contestacao' @{ p_cpf = $cpfFicticio; p_nascimento = '2000-01-01' } | Out-Null }
+$bloqueio = Texto (Rpc $anon 'consultar_ficha_contestacao' @{ p_cpf = $cpfFicticio; p_nascimento = '2000-01-01' })
+Ok "6a consulta do mesmo CPF na hora e bloqueada" ($bloqueio -match 'muitas tentativas') $bloqueio.Substring(0, [Math]::Min(80, $bloqueio.Length))
+
+$tentativas = Invoke-HdSql -Sql "select count(*)::int as n from public.tentativa_publica where chave ~ '^[0-9a-f]{64}$'"
+$semTexto = Invoke-HdSql -Sql "select count(*)::int as n from public.tentativa_publica where chave in ('$cpfMaria', '$cpfFicticio')"
+Ok "tentativas guardam so HMAC, sem CPF" ([int]@($tentativas)[0].n -ge 6 -and [int]@($semTexto)[0].n -eq 0) "hmac=$(@($tentativas)[0].n)"
 
 Write-Host "`n[T10 visibilidade: contestado sai da rede]" -ForegroundColor Cyan
 $antesRede = Texto (Rpc $vianorte 'buscar_motorista' @{ p_termo = 'Maria Aparecida Lima' })
 Ok "antes: rede encontra Maria" ($antesRede -match 'Maria Aparecida Lima')
 
-$proto = Rpc $anon 'abrir_contestacao' @{
-  p_incidente_id = 'bbbbbbb1-0000-4000-8000-000000000004'
+$pedido = @{
   p_cpf = $cpfMaria
+  p_nascimento = '1990-01-01'
   p_nome = 'Maria Aparecida Lima'
   p_email = 'maria@exemplo.com'
   p_descricao = 'Nao reconheco a retirada descrita; o veiculo estava em manutencao na data.'
 }
-Ok "anon abre contestacao" ($proto -match '^[0-9a-f-]{36}$') (Texto $proto)
+$protoErrado = Texto (Rpc $anon 'abrir_contestacao' $pedido)
+Ok "nascimento errado nao abre contestacao" ($protoErrado -match '"ok":false') $protoErrado
+
+$pedido.p_nascimento = $nascMaria
+$proto = Rpc $anon 'abrir_contestacao' $pedido
+Ok "anon abre contestacao com CPF + nascimento" ($proto.ok -eq $true -and @($proto.protocolos).Count -eq 1 -and @($proto.protocolos)[0] -match '^[0-9a-f-]{36}$') (Texto $proto)
 
 $depoisRede = Texto (Rpc $vianorte 'buscar_motorista' @{ p_termo = 'Maria Aparecida Lima' })
 Ok "depois: contestado sai da rede" ($depoisRede -notmatch 'Maria Aparecida Lima') $depoisRede.Substring(0, [Math]::Min(80, $depoisRede.Length))
@@ -195,6 +219,9 @@ Ok "dono decide contestacao" ($null -eq $decisao -or $decisao -eq '') $decisao
 $depoisVolta = Texto (Rpc $vianorte 'buscar_motorista' @{ p_termo = 'Maria Aparecida Lima' })
 Ok "improcedente devolve Maria a rede" ($depoisVolta -match 'Maria Aparecida Lima')
 
+$reabrir = Texto (Rpc $anon 'abrir_contestacao' $pedido)
+Ok "improcedente nao reabre pelo canal publico" ($reabrir -match 'nada_a_contestar') $reabrir
+
 try {
   Invoke-HdSql -Sql "delete from public.contestacao where incidente_id = 'bbbbbbb1-0000-4000-8000-000000000004'" | Out-Null
   Ok "limpeza da contestacao de teste" $true
@@ -202,6 +229,116 @@ try {
 catch {
   Ok "limpeza da contestacao de teste" $false $_.Exception.Message
 }
+
+Write-Host "`n[superficie de RPC]" -ForegroundColor Cyan
+$superficie = @(Invoke-HdSql -Sql @"
+select
+  coalesce((select string_agg(p.proname, ',' order by p.proname)
+              from pg_proc p
+             where p.pronamespace = 'public'::regnamespace
+               and has_function_privilege('anon', p.oid, 'execute')), '') as anon,
+  coalesce((select string_agg(p.proname, ',' order by p.proname)
+              from pg_proc p
+             where p.pronamespace = 'public'::regnamespace
+               and has_function_privilege('authenticated', p.oid, 'execute')
+               and p.proname in ('registrar_auditoria', 'registrar_consulta', 'criar_notificacao',
+                                 'finalizar_contestacao', 'existe_visivel_para', 'expurgar_incidente',
+                                 'aplicar_retencao', 'processar_descarte_anexos', 'redigir_trilha',
+                                 'limitar_tentativa', 'verificar_titular', 'chave_privada')), '') as vazadas
+"@)[0]
+Ok "funcoes internas fora de anon/authenticated" ($superficie.vazadas -eq '') $superficie.vazadas
+Ok "anon so executa o canal de contestacao" ($superficie.anon -eq 'abrir_contestacao,consultar_ficha_contestacao') $superficie.anon
+$forjar = Texto (Rpc $central 'registrar_auditoria' @{
+  p_locadora_id = '22222222-2222-2222-2222-222222222222'; p_acao = 'forjado'
+  p_alvo_tipo = 'incidente'; p_alvo_id = 'bbbbbbb1-0000-4000-8000-000000000003'
+})
+Ok "dono nao forja audit_log" ($forjar -match 'permission|denied|42501|PGRST') $forjar.Substring(0, [Math]::Min(80, $forjar.Length))
+
+Write-Host "`n[storage: pasta ativa, rascunho orfao e prova protegida]" -ForegroundColor Cyan
+function Storage($s, [string]$metodo, [string]$caminho, $corpo) {
+  $h = @{ apikey = $pub; Authorization = "Bearer $($s.access_token)" }
+  try {
+    if ($metodo -eq 'POST') {
+      $h['Content-Type'] = 'image/png'
+      Invoke-RestMethod -Uri "$base/storage/v1/object/anexos/$caminho" -Method POST -Headers $h -Body $corpo | Out-Null
+    }
+    else {
+      $h['Content-Type'] = 'application/json'
+      $b = @{ prefixes = @($caminho) } | ConvertTo-Json
+      Invoke-RestMethod -Uri "$base/storage/v1/object/anexos" -Method DELETE -Headers $h -Body $b | Out-Null
+    }
+    return 'ok'
+  }
+  catch { return "ERRO: $($_.Exception.Message)" }
+}
+function ExisteObjeto([string]$caminho) {
+  $r = Invoke-HdSql -Sql "select count(*)::int as n from storage.objects where bucket_id = 'anexos' and name = '$caminho'"
+  return [int]@($r)[0].n -gt 0
+}
+$png = [byte[]](0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A)
+$pastaC = '11111111-1111-1111-1111-111111111111'
+$orfao = "$pastaC/rascunho/verif-$([guid]::NewGuid()).png"
+$prova = "$pastaC/rascunho/verif-$([guid]::NewGuid()).png"
+
+Ok "dono envia para o proprio rascunho" ((Storage $central 'POST' $orfao $png) -eq 'ok')
+Ok "dono nao envia fora de rascunho" ((Storage $central 'POST' "$pastaC/outra/verif.png" $png) -ne 'ok')
+Ok "dono nao envia para pasta de outra locadora" ((Storage $vianorte 'POST' "$pastaC/rascunho/verif-intruso.png" $png) -ne 'ok')
+
+Storage $vianorte 'DELETE' $orfao $null | Out-Null
+Ok "outra locadora nao apaga o arquivo" (ExisteObjeto $orfao)
+Storage $central 'DELETE' $orfao $null | Out-Null
+Ok "dono apaga rascunho orfao" (-not (ExisteObjeto $orfao))
+
+Storage $central 'POST' $prova $png | Out-Null
+Invoke-HdSql -Sql @"
+insert into public.anexo (incidente_id, locadora_id, caminho, content_type, bytes, hash)
+values ('bbbbbbb1-0000-4000-8000-000000000004', '$pastaC', '$prova', 'image/png', 8, repeat('a', 64))
+"@ | Out-Null
+Storage $central 'DELETE' $prova $null | Out-Null
+Ok "anexo vinculado a incidente nao e apagado pelo cliente" (ExisteObjeto $prova)
+
+Write-Host "`n[retencao: descarte de arquivo pela Storage API]" -ForegroundColor Cyan
+Invoke-HdSql -Sql @"
+delete from public.anexo where caminho = '$prova';
+insert into public.anexo_descarte (caminho) values ('$prova') on conflict do nothing;
+"@ | Out-Null
+$disparos = @(Invoke-HdSql -Sql "select public.processar_descarte_anexos() as n")[0].n
+$sumiu = $false
+foreach ($i in 1..10) {
+  Start-Sleep -Seconds 2
+  if (-not (ExisteObjeto $prova)) { $sumiu = $true; break }
+}
+Ok "job de descarte apaga o arquivo no storage" ($sumiu) "disparos=$disparos"
+Invoke-HdSql -Sql "select public.processar_descarte_anexos()" | Out-Null
+$naFila = @(Invoke-HdSql -Sql "select count(*)::int as n from public.anexo_descarte where caminho = '$prova'")[0].n
+Ok "fila de descarte esvazia" ([int]$naFila -eq 0) "fila=$naFila"
+
+Write-Host "`n[retencao: expurgo minimiza a trilha]" -ForegroundColor Cyan
+$velho = 'bbbbbbb1-0000-4000-8000-000000000099'
+Invoke-HdSql -Sql @"
+insert into public.incidente (id, motorista_id, locadora_id, placa, tipo, descricao, estado, confianca, criado_por, criado_em)
+values ('$velho', 'aaaaaaa1-0000-4000-8000-000000000002', '$pastaC', 'OLD1A23', 'dano_veiculo',
+        'Descricao sensivel que precisa sumir no expurgo.', 'suspeita', 'media', '$($central.user.id)', now() - interval '40 days')
+on conflict (id) do nothing;
+insert into public.audit_log (locadora_id, ator, acao, alvo_tipo, alvo_id, antes, depois)
+values ('$pastaC', '$($central.user.id)', 'incidente.criar', 'incidente', '$velho', null,
+        jsonb_build_object('estado', 'suspeita', 'placa', 'OLD1A23', 'descricao', 'Descricao sensivel'));
+"@ | Out-Null
+$expurgo = Texto (Rpc $admin 'purge_suspeitas_nao_confirmadas' @{ p_dias = 30 })
+$resto = @(Invoke-HdSql -Sql "select count(*)::int as n from public.incidente where id = '$velho'")[0].n
+Ok "suspeita de 40 dias e expurgada" ([int]$expurgo -ge 1 -and [int]$resto -eq 0) "purge=$expurgo"
+$trilha = Texto @(Invoke-HdSql -Sql "select coalesce(string_agg(acao || ':' || coalesce(antes::text, '') || coalesce(depois::text, ''), ' | '), '') as t from public.audit_log where alvo_id = '$velho'")[0].t
+Ok "trilha mantem a acao sem placa nem descricao" ($trilha -match 'incidente.criar' -and $trilha -match 'incidente.purge' -and $trilha -notmatch 'OLD1A23|Descricao sensivel') $trilha
+try {
+  Invoke-HdSql -Sql "update public.audit_log set depois = null where alvo_id = '$velho'" | Out-Null
+  Ok "audit_log segue append-only fora da redacao" $false
+}
+catch {
+  Ok "audit_log segue append-only fora da redacao" ($_.Exception.Message -match 'append-only') ''
+}
+
+$cron = @(Invoke-HdSql -Sql "select string_agg(jobname, ',' order by jobname) as j from cron.job where active")[0].j
+Ok "retencao e descarte agendados no pg_cron" ($cron -match 'hd-descarte-anexos' -and $cron -match 'hd-retencao-diaria') $cron
 
 Write-Host ""
 if ($falhas -eq 0) { Write-Host "TODAS AS VERIFICACOES PASSARAM" -ForegroundColor Green }

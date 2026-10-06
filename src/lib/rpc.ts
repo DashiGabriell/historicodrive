@@ -29,7 +29,9 @@ const TRADUCOES: Array<[RegExp, string]> = [
   [/ja existe contestacao aberta/, "Já existe uma contestação aberta para este incidente."],
   [/contestacao ja decidida/, "Esta contestação já foi decidida."],
   [/recurso so apos o prazo/, "O recurso só vale depois do prazo da locadora."],
-  [/registro nao encontrado ou dados invalidos/, "CPF não confere com nenhum registro. Confira os 11 dígitos."],
+  [/muitas tentativas/, "Muitas tentativas seguidas. Aguarde um pouco e tente de novo."],
+  [/data de nascimento obrigatoria/, "Informe a data de nascimento do motorista."],
+  [/data de nascimento invalida/, "Data de nascimento inválida: o motorista precisa ter 18 anos ou mais."],
   [/periodo invalido/, "Período inválido: a data inicial vem depois da final."],
   [/locadora_cnpj_uniq|duplicate key.*cnpj/, "Já existe uma locadora com este CNPJ."],
 ];

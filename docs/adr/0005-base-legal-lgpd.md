@@ -30,7 +30,7 @@ Sem base legal escrita e sem limites de retenção, o produto é atacado como �
 - Rede é **buscável, não listável** (ADR 0001): sem feed, sem enumeração, sem “recentes”.
 - `suspeita` e `contestado` **não** cruzam a rede.
 - Anexo **nunca** sai da locadora dona.
-- Canal de contestação do titular com verificação de CPF; ao abrir, incidente vai para `contestado`.
+- Canal de contestação do titular com verificação de **CPF + data de nascimento** e limite de tentativas (por CPF, por IP e global; chaves guardadas como HMAC); ao abrir, incidente vai para `contestado`. Improcedente não reabre pelo canal público.
 - `superadmin` **sem** leitura de motorista/incidente (ADR 0004).
 - `consulta_log` e `audit_log` append-only.
 - Termos da locadora com cláusulas de responsabilidade e aceite auditado.
@@ -39,21 +39,22 @@ Sem base legal escrita e sem limites de retenção, o produto é atacado como �
 
 | Dado                                   | Política                                                                                          |
 | -------------------------------------- | ------------------------------------------------------------------------------------------------- |
-| `incidente` em `suspeita` nunca confirmada | **Purge em 30 dias** (soft-delete/anonimização + audit da exclusão). Default fixo no produto (Q13=A) |
-| `incidente` em `confirmado`            | **Retenção indefinida** com justificativa: registro de fato contestável, prova das locadoras e da rede (Q19=A). Revisão da política em **12 meses** |
-| `incidente` em `contestado`            | Mantém trilha da contestação; visibilidade só da locadora dona (ADR 0001); segue a regra do `confirmado` se/devolver para `confirmado` |
-| `consulta_log`, `audit_log`            | Append-only; retenção operacional (sugestão: 5 anos) para prova em processo                        |
-| Anexo                                  | Segue o `incidente` dono; hash SHA-256 no upload para integridade                                  |
+| `incidente` em `suspeita` nunca confirmada | **Purge em 30 dias**, diário via `pg_cron` (`aplicar_retencao`). Default fixo no produto (Q13=A) |
+| `incidente` em `confirmado`/`contestado` | **Purge em 5 anos** contados do registro, com contestações e anexos (revisão 2026-10-06, substitui a retenção indefinida de Q19=A) |
+| Ficha de `motorista` sem incidente     | Apagada no job diário (CPF e nome sem finalidade)                                                  |
+| `consulta_log`, `audit_log`            | Append-only; no expurgo, `antes`/`depois` do alvo são minimizados (fica ação, autor, data, estado; saem placa, descrição, motivo, ids do motorista). `consulta_log` guarda só o uuid do motorista |
+| Anexo                                  | Segue o `incidente` dono; hash SHA-256 no upload. No expurgo, o arquivo sai pela Storage API (fila `anexo_descarte`, job `hd-descarte-anexos`). Rascunho órfão some em 2 dias |
+| Rascunho no navegador                  | `sessionStorage`, apagado no logout                                                                |
 
 ### Direitos do titular (motorista)
 
-- **Contestar** via formulário `/contestar` com verificação de CPF (Q11=C): o sistema só confirma *há ficha / não há ficha* e, se houver, abre pedido com nome, e-mail e descrição.
+- **Contestar** via formulário `/contestar` com CPF + data de nascimento (Q11=C): o sistema só confirma *há ficha / não há ficha* (nunca lista incidente, locadora ou `suspeita`) e, se houver, abre um pedido por incidente confirmado com nome, e-mail e descrição. Ficha sem data de nascimento não se verifica pelo canal público: o titular usa o canal do operador.
 - Pedidos de **informação, correção ou eliminação** tratados pelo canal do operador encaminhando à controladora (locadora dona do registro), com registro em audit.
 
 ## Consequências
 
 - Balanceamento de legítimo interesse fica **escrito e versionado** — é o primeiro documento que ANPD/juiz pede.
-- Retenção indefinida de `confirmado` é consciente e revisável; `suspeita` órfã não eterniza boato.
+- Retenção de `confirmado` limitada a 5 anos (alternativa C adotada na revisão); `suspeita` órfã não eterniza boato.
 - Contenção de `superadmin` e log de consulta são **salvaguardas operacionais**, não cosmética.
 - Se o produto sair do Brasil ou mudar finalidade (ex.: scoring de crédito), esta ADR **não** cobre — nova decisão obrigatória.
 

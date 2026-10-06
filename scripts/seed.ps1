@@ -137,6 +137,8 @@ select locadora_id, criado_por, 'incidente.criar', 'incidente', id,
 
 -- reseta contestacoes de teste (idempotente antes de rodar verificar-defesa)
 delete from contestacao where incidente_id::text like 'bbbbbbb1-%';
+-- zera o limite de tentativas do canal publico (verificar-defesa consome cota)
+delete from tentativa_publica;
 "@
 
 $r = Invoke-HdSql -Sql $sql

@@ -17,8 +17,13 @@
   e da defesa legal em `scripts/verificar-defesa.ps1` (alteram dados: rode o
   seed antes de repetir).
 - Todo acesso ao banco é por RPC `SECURITY DEFINER` (ver `docs/adr/0003-stack-sem-orm.md`).
-  Nenhuma leitura direta de tabela pelo cliente.
+ Nenhuma leitura direta de tabela pelo cliente. Função nova nasce executável por
+ `PUBLIC`: toda migration fecha com `revoke execute ... from public, anon, authenticated`
+ e grant explícito só das RPCs de tela (`verificar-defesa.ps1` confere a superfície).
+- Retenção roda no `pg_cron` (`hd-retencao-diaria`, `hd-descarte-anexos`); arquivos
+ só saem pela Storage API com a chave guardada no Vault por `scripts/configurar-descarte.ps1`.
 - Defesa legal / prova: ADR 0004–0005, `docs/juridico/` (rascunhos p/ advogado) e
   spec em `docs/spec-defesa-legal.md`. Tickets em `.scratch/defesa-legal/issues/`.
   Nova RPC de leitura **não** pode devolver `motorista`/`incidente` para `superadmin`.
-  Fluxos públicos (sem login): `/termos`, `/contestar` (contestação por CPF).
+  Fluxos públicos (sem login): `/termos`, `/contestar` (contestação por CPF +
+ data de nascimento, com limite de tentativas).
