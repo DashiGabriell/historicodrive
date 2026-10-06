@@ -5,6 +5,7 @@ import {
   type PointerEvent as EventoPonteiro,
 } from "react";
 import { NavLink } from "react-router-dom";
+import { BotaoInstalarApp } from "@/components/instalar-app";
 import { iniciais } from "@/lib/dominio";
 import type { Perfil } from "@/lib/sessao-contexto";
 import { Button, cx } from "@/ui";
@@ -255,6 +256,7 @@ export function FolhaConta({
       ) : null}
 
       <div className="flex flex-col gap-2">
+        <BotaoInstalarApp variant="secondary" size="lg" />
         <Button variant="outline" size="lg" onClick={onSair}>
           Sair da conta
         </Button>

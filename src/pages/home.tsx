@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, Navigate } from "react-router-dom";
 import { ConfiancaBadge, EstadoBadge } from "@/components/dominio";
+import { BotaoInstalarApp } from "@/components/instalar-app";
 import { formatarBytes } from "@/lib/anexos";
 import {
   MAX_ANEXOS,
@@ -96,7 +97,10 @@ export default function Home() {
             incidentes de motoristas. No balcão você digita o CPF e a ficha responde —
             com estado, confiança e evidência na mesma tela.
           </p>
-          <div className="vitrine-acoes">{acoesDe(perfil)}</div>
+          <div className="vitrine-acoes">
+            {acoesDe(perfil)}
+            <BotaoInstalarApp variant="ghost" size="lg" />
+          </div>
           <p className="vitrine-nota">
             O cadastro da locadora é aprovado pela plataforma antes de valer a rede.
           </p>
@@ -368,6 +372,9 @@ export default function Home() {
             Instala como aplicativo no celular da loja: o rascunho do incidente
             sobrevive à queda de conexão.
           </p>
+          <div className="mt-4 flex justify-center">
+            <BotaoInstalarApp>Instalar no celular</BotaoInstalarApp>
+          </div>
         </div>
       </section>
 
