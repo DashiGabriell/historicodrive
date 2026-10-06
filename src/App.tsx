@@ -29,6 +29,7 @@ import Login from "@/pages/login";
 import Motorista from "@/pages/motorista";
 import NotFound from "@/pages/not-found";
 import Painel from "@/pages/painel";
+import Rascunhos from "@/pages/rascunhos";
 import RedefinirSenha from "@/pages/redefinir-senha";
 import Styleguide from "@/pages/styleguide";
 import Termos from "@/pages/termos";
@@ -39,6 +40,7 @@ const MENU_LOCADORA: ItemMenu[] = [
   { href: "/busca", rotulo: "Buscar", icone: "buscar" },
   { href: "/incidente/novo", rotulo: "Registrar", icone: "registrar", destaque: true },
   { href: "/contestacoes", rotulo: "Contestações", icone: "contestacao" },
+  { href: "/rascunhos", rotulo: "Rascunhos", icone: "rascunho", secundario: true },
   { href: "/auditoria", rotulo: "Auditoria", icone: "auditoria", secundario: true },
   { href: "/config", rotulo: "Configurações", icone: "config", secundario: true },
 ];
@@ -243,6 +245,7 @@ export default function App() {
           <Route path="/motorista/:id" element={protegida(<Motorista />)} />
           <Route path="/incidente/novo" element={protegida(<IncidenteNovo />)} />
           <Route path="/incidente/:id" element={protegida(<Incidente />)} />
+          <Route path="/rascunhos" element={protegida(<Rascunhos />)} />
           <Route path="/config" element={protegida(<Configuracoes />)} />
           <Route path="/auditoria" element={protegida(<Auditoria />)} />
           <Route path="/contestacoes" element={protegida(<Contestacoes />)} />

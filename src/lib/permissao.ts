@@ -26,6 +26,7 @@ const ROTAS_LOCADORA = [
   "/busca",
   "/motorista",
   "/incidente",
+  "/rascunhos",
   "/config",
   "/auditoria",
   "/contestacoes",

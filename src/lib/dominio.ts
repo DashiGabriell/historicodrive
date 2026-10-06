@@ -82,6 +82,59 @@ export function placaValida(valor: string): boolean {
   return /^[A-Z]{3}-?[0-9]{4}$/.test(placa) || /^[A-Z]{3}[0-9][A-Z][0-9]{2}$/.test(placa);
 }
 
+export const PLACA_TAMANHO = 7;
+
+/** posição a posição: 3 letras, 1 número, letra ou número (Mercosul), 2 números */
+const PLACA_POSICOES = [/[A-Z]/, /[A-Z]/, /[A-Z]/, /\d/, /[A-Z\d]/, /\d/, /\d/];
+
+/** máscara da digitação: descarta o que não cabe na posição e trava em 7 */
+export function mascararPlaca(valor: string): string {
+  let placa = "";
+  for (const caractere of valor.toUpperCase()) {
+    if (placa.length === PLACA_TAMANHO) break;
+    if (PLACA_POSICOES[placa.length]?.test(caractere)) placa += caractere;
+  }
+  return placa;
+}
+
+export function placaCompleta(valor: string): boolean {
+  return valor.length === PLACA_TAMANHO && placaValida(valor);
+}
+
+/** R$ 99.999.999,99: cabe no numeric(12,2) do banco com folga */
+export const VALOR_MAXIMO_CENTAVOS = 9_999_999_999;
+
+/** digitação estilo caixa eletrônico: só dígitos, preenchendo da direita */
+export function centavosDeTexto(texto: string): string {
+  const digitos = somenteDigitos(texto).replace(/^0+/, "");
+  return digitos.slice(0, String(VALOR_MAXIMO_CENTAVOS).length);
+}
+
+const decimal = new Intl.NumberFormat("pt-BR", {
+  minimumFractionDigits: 2,
+  maximumFractionDigits: 2,
+});
+
+/** "150000" -> "1.500,00"; vazio continua vazio */
+export function formatarCentavos(centavos: string): string {
+  if (centavos === "") return "";
+  return decimal.format(Number(centavos) / 100);
+}
+
+export function reaisDeCentavos(centavos: string): number | null {
+  return centavos === "" ? null : Number(centavos) / 100;
+}
+
+/** null quando o valor serve (inclusive vazio); senão, a mensagem do erro */
+export function erroDoValor(centavos: string): string | null {
+  if (centavos === "") return null;
+  if (!/^\d+$/.test(centavos)) return "Valor inválido.";
+  const n = Number(centavos);
+  if (n <= 0) return "Informe um valor maior que zero ou deixe o campo vazio.";
+  if (n > VALOR_MAXIMO_CENTAVOS) return "Valor acima do limite de R$ 99.999.999,99.";
+  return null;
+}
+
 export function cpfValido(valor: string): boolean {
   const cpf = somenteDigitos(valor);
   if (cpf.length !== 11 || /^(\d)\1{10}$/.test(cpf)) return false;

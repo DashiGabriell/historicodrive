@@ -1,5 +1,5 @@
 import { useEffect, useState, type ChangeEvent, type FormEvent } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import {
   FORMATO_HASH,
   TAMANHO_MAXIMO,
@@ -9,21 +9,36 @@ import {
   formatarBytes,
   removerAnexo,
   urlsAssinadas,
-  type AnexoEnviado,
 } from "@/lib/anexos";
 import {
   CONFIANCAS,
   MAX_ANEXOS,
+  PLACA_TAMANHO,
   TIPOS,
-  cpfValido,
+  centavosDeTexto,
+  erroDoValor,
+  formatarCentavos,
   formatarCpf,
-  normalizarPlaca,
-  placaValida,
+  mascararPlaca,
+  reaisDeCentavos,
   somenteDigitos,
   type Confianca,
   type TipoIncidente,
 } from "@/lib/dominio";
-import { apagarRascunho, lerRascunho, salvarRascunho } from "@/lib/rascunho";
+import {
+  normalizarRascunho,
+  pendencias,
+  rascunhoVazio,
+  temConteudo,
+  type RascunhoIncidente,
+} from "@/lib/incidente-rascunho";
+import {
+  apagarRascunho,
+  lerRascunho,
+  listarRascunhos,
+  novoIdRascunho,
+  salvarRascunho,
+} from "@/lib/rascunho";
 import { mensagemDe, rpc } from "@/lib/rpc";
 import { useSessao } from "@/lib/sessao-contexto";
 import { useCarga } from "@/lib/use-carga";
@@ -40,71 +55,71 @@ import {
   controlClass,
 } from "@/ui";
 
-type Rascunho = {
-  passo: 1 | 2;
-  anexos: AnexoEnviado[];
-  motorista: { id: string; nome: string } | null;
-  cpf: string;
-  nome: string;
-  nascimento: string;
-  placa: string;
-  tipo: TipoIncidente;
-  valor: string;
-  confianca: Confianca;
-  descricao: string;
-};
-
 type Origem = {
   cpf?: string;
   nome?: string;
   motorista?: { id: string; nome: string };
 } | null;
 
-function rascunhoInicial(locadoraId: string, origem: Origem): Rascunho {
-  const vazio: Rascunho = {
-    passo: 1,
-    anexos: [],
-    motorista: null,
-    cpf: "",
-    nome: "",
-    nascimento: "",
-    placa: "",
-    tipo: "dano_veiculo",
-    valor: "",
-    confianca: "media",
-    descricao: "",
-  };
+function rascunhoInicial(locadoraId: string, id: string, origem: Origem): RascunhoIncidente {
+  const salvo = lerRascunho(locadoraId, id);
+  // rascunho já guardado vence: a origem só preenche um registro novo
+  if (salvo) return normalizarRascunho(salvo);
 
-  const salvo = lerRascunho(locadoraId) as Partial<Rascunho>;
-  const base = { ...vazio, ...salvo };
-  // rascunho antigo sem hash (prova de integridade) nao sobrevive ao envio
-  base.anexos = (base.anexos ?? []).filter((a) => a?.hash && FORMATO_HASH.test(a.hash));
+  const base = rascunhoVazio();
   if (origem?.motorista) return { ...base, motorista: origem.motorista };
-  if (origem?.cpf) return { ...base, motorista: null, cpf: formatarCpf(origem.cpf) };
-  if (origem?.nome) return { ...base, motorista: null, nome: origem.nome };
+  if (origem?.cpf) return { ...base, cpf: formatarCpf(origem.cpf) };
+  if (origem?.nome) return { ...base, nome: origem.nome };
   return base;
 }
 
 export default function IncidenteNovo() {
   useTitulo("Registrar incidente · Histórico");
   const { perfil } = useSessao();
-  const locadoraId = perfil?.locadora_ativa;
-  if (!locadoraId) return null;
-  // trocar de locadora descarta o formulario: os anexos sao da pasta da anterior
-  return <Formulario key={locadoraId} locadoraId={locadoraId} />;
-}
-
-function Formulario({ locadoraId }: { locadoraId: string }) {
   const local = useLocation();
   const navegar = useNavigate();
-  const [r, setR] = useState(() => rascunhoInicial(locadoraId, local.state as Origem));
+  const [params] = useSearchParams();
+  const rascunhoId = params.get("rascunho");
+  const locadoraId = perfil?.locadora_ativa;
+
+  // sem id na URL é um registro novo: ganha um id para sobreviver ao recarregar
+  useEffect(() => {
+    if (rascunhoId) return;
+    navegar(
+      { search: `?rascunho=${novoIdRascunho()}` },
+      { replace: true, state: local.state },
+    );
+  }, [rascunhoId, navegar, local.state]);
+
+  if (!locadoraId || !rascunhoId) return null;
+  // trocar de locadora descarta o formulario: os anexos sao da pasta da anterior
+  return (
+    <Formulario
+      key={`${locadoraId}:${rascunhoId}`}
+      locadoraId={locadoraId}
+      rascunhoId={rascunhoId}
+    />
+  );
+}
+
+function Formulario({ locadoraId, rascunhoId }: { locadoraId: string; rascunhoId: string }) {
+  const local = useLocation();
+  const navegar = useNavigate();
+  const [r, setR] = useState(() =>
+    rascunhoInicial(locadoraId, rascunhoId, local.state as Origem),
+  );
+  const [outrosRascunhos] = useState(
+    () => listarRascunhos(locadoraId).filter((item) => item.id !== rascunhoId).length,
+  );
   const [enviandoArquivos, setEnviandoArquivos] = useState(0);
   const [erro, setErro] = useState<string | null>(null);
   const [salvando, setSalvando] = useState(false);
+  const [tentouEnviar, setTentouEnviar] = useState(false);
 
   useEffect(() => {
-    salvarRascunho(locadoraId, r);
-  }, [locadoraId, r]);
+    if (temConteudo(r)) salvarRascunho(locadoraId, rascunhoId, r);
+    else apagarRascunho(locadoraId, rascunhoId);
+  }, [locadoraId, rascunhoId, r]);
 
   const caminhos = r.anexos.map((a) => a.caminho);
   const previas = useCarga(
@@ -112,7 +127,7 @@ function Formulario({ locadoraId }: { locadoraId: string }) {
     () => urlsAssinadas(caminhos),
   );
 
-  function atualizar<K extends keyof Rascunho>(campo: K, valor: Rascunho[K]) {
+  function atualizar<K extends keyof RascunhoIncidente>(campo: K, valor: RascunhoIncidente[K]) {
     setR((atual) => ({ ...atual, [campo]: valor }));
   }
 
@@ -153,48 +168,37 @@ function Formulario({ locadoraId }: { locadoraId: string }) {
     await removerAnexo(caminho);
   }
 
-  function validar(): string | null {
-    if (r.anexos.length < 1) return "Envie ao menos uma foto ou documento.";
-    if (r.anexos.some((a) => !a.hash || !FORMATO_HASH.test(a.hash)))
-      return "Um dos anexos está sem a prova de integridade. Envie os arquivos de novo.";
-    if (!r.motorista) {
-      if (!cpfValido(r.cpf)) return "CPF do motorista inválido.";
-      if (r.nome.trim().length < 5 || r.nome.trim().split(/\s+/).length < 2) {
-        return "Informe o nome completo do motorista.";
-      }
-      if (!r.nascimento) return "Informe a data de nascimento do motorista.";
-    }
-    if (!placaValida(r.placa)) return "Placa inválida. Use ABC-1234 ou ABC1D23.";
-    if (r.valor !== "" && (Number.isNaN(Number(r.valor)) || Number(r.valor) < 0)) {
-      return "Valor inválido.";
-    }
-    if (r.descricao.trim().length < 10)
-      return "A descrição precisa de ao menos 10 caracteres.";
-    return null;
-  }
-
   async function enviar(evento: FormEvent) {
     evento.preventDefault();
-    const problema = validar();
+    setTentouEnviar(true);
+    const problema =
+      r.anexos.some((a) => !a.hash || !FORMATO_HASH.test(a.hash))
+        ? "Um dos anexos está sem a prova de integridade. Envie os arquivos de novo."
+        : (pendencias(r)[0] ?? null);
     setErro(problema);
     if (problema) return;
 
     setSalvando(true);
     try {
-      const motoristaId =
-        r.motorista?.id ??
-        (await rpc<string>("criar_ou_localizar_motorista", {
+      let motoristaId = r.motorista?.id;
+      if (!motoristaId) {
+        const nome = r.nome.trim();
+        const criado = await rpc<string>("criar_ou_localizar_motorista", {
           p_cpf: somenteDigitos(r.cpf),
-          p_nome_completo: r.nome.trim(),
+          p_nome_completo: nome,
           p_nascimento: r.nascimento || null,
-        }));
+        });
+        motoristaId = criado;
+        // se o incidente falhar, o reenvio não recria o motorista
+        setR((atual) => ({ ...atual, motorista: { id: criado, nome } }));
+      }
 
       const id = await rpc<string>("criar_incidente", {
         p_motorista_id: motoristaId,
-        p_placa: normalizarPlaca(r.placa),
+        p_placa: r.placa,
         p_tipo: r.tipo,
         p_descricao: r.descricao.trim(),
-        p_valor: r.valor === "" ? null : Number(r.valor),
+        p_valor: reaisDeCentavos(r.valorCentavos),
         p_confianca: r.confianca,
         p_anexos: r.anexos.map(({ caminho, content_type, bytes, hash }) => ({
           caminho,
@@ -204,7 +208,7 @@ function Formulario({ locadoraId }: { locadoraId: string }) {
         })),
       });
 
-      apagarRascunho(locadoraId);
+      apagarRascunho(locadoraId, rascunhoId);
       navegar(`/incidente/${id}`, { replace: true, state: { criado: true } });
     } catch (causa) {
       setErro(mensagemDe(causa, "Não foi possível registrar o incidente."));
@@ -214,12 +218,15 @@ function Formulario({ locadoraId }: { locadoraId: string }) {
 
   async function descartar() {
     const anexos = r.anexos;
-    apagarRascunho(locadoraId);
-    setR(rascunhoInicial(locadoraId, null));
-    await Promise.all(anexos.map((a) => removerAnexo(a.caminho)));
+    apagarRascunho(locadoraId, rascunhoId);
+    setR(rascunhoVazio());
+    setErro(null);
+    setTentouEnviar(false);
+    await Promise.allSettled(anexos.map((a) => removerAnexo(a.caminho)));
   }
 
-  const temRascunho = r.anexos.length > 0 || r.descricao !== "" || r.placa !== "";
+  const erroValor = erroDoValor(r.valorCentavos);
+  const placaIncompleta = r.placa.length > 0 && r.placa.length < PLACA_TAMANHO;
 
   return (
     <div className="container flex max-w-3xl flex-col gap-6 py-6 sm:py-10">
@@ -228,13 +235,25 @@ function Formulario({ locadoraId }: { locadoraId: string }) {
         title="Registrar incidente"
         description="Fotos primeiro: a prova fica salva mesmo se a conexão cair. O rascunho volta se você recarregar a página."
         actions={
-          temRascunho ? (
+          temConteudo(r) ? (
             <Button variant="ghost" size="sm" onClick={() => void descartar()}>
               Descartar rascunho
             </Button>
           ) : null
         }
       />
+
+      {outrosRascunhos > 0 ? (
+        <Alert variant="info">
+          <span>
+            Você tem {outrosRascunhos} outro{outrosRascunhos > 1 ? "s" : ""} rascunho
+            {outrosRascunhos > 1 ? "s" : ""} nesta sessão.{" "}
+            <Link to="/rascunhos" className="font-semibold text-primary">
+              Ver rascunhos
+            </Link>
+          </span>
+        </Alert>
+      ) : null}
 
       <ol className="flex flex-wrap gap-6" aria-label="Passos">
         {["Fotos e documentos", "Motorista e fato"].map((rotulo, i) => (
@@ -335,7 +354,7 @@ function Formulario({ locadoraId }: { locadoraId: string }) {
           </div>
         </Card>
       ) : (
-        <form className="flex flex-col gap-6" onSubmit={(e) => void enviar(e)}>
+        <form className="flex flex-col gap-6" noValidate onSubmit={(e) => void enviar(e)}>
           <Card className="flex flex-col gap-4">
             <CardTitle>Motorista</CardTitle>
             {r.motorista ? (
@@ -411,7 +430,16 @@ function Formulario({ locadoraId }: { locadoraId: string }) {
               <Field
                 label="Placa do veículo"
                 htmlFor="placa"
-                hint="ABC-1234 ou ABC1D23"
+                hint={
+                  placaIncompleta
+                    ? `${r.placa.length} de ${PLACA_TAMANHO} caracteres`
+                    : "7 caracteres: ABC1234 ou ABC1D23"
+                }
+                error={
+                  tentouEnviar && r.placa.length < PLACA_TAMANHO
+                    ? `A placa precisa de exatamente ${PLACA_TAMANHO} caracteres.`
+                    : undefined
+                }
                 required
               >
                 <input
@@ -421,10 +449,15 @@ function Formulario({ locadoraId }: { locadoraId: string }) {
                   autoCorrect="off"
                   spellCheck={false}
                   enterKeyHint="next"
-                  className={controlClass("input")}
+                  placeholder="ABC1D23"
+                  minLength={PLACA_TAMANHO}
+                  maxLength={PLACA_TAMANHO}
+                  className={controlClass(
+                    "input",
+                    tentouEnviar && r.placa.length < PLACA_TAMANHO,
+                  )}
                   value={r.placa}
-                  maxLength={8}
-                  onChange={(e) => atualizar("placa", e.target.value.toUpperCase())}
+                  onChange={(e) => atualizar("placa", mascararPlaca(e.target.value))}
                 />
               </Field>
               <Field label="Tipo" htmlFor="tipo" required>
@@ -445,17 +478,26 @@ function Formulario({ locadoraId }: { locadoraId: string }) {
                 label="Prejuízo (R$)"
                 htmlFor="valor"
                 hint="Deixe vazio se ainda não souber"
+                error={erroValor ?? undefined}
               >
-                <input
-                  id="valor"
-                  type="number"
-                  inputMode="decimal"
-                  min={0}
-                  step="0.01"
-                  className={controlClass("input")}
-                  value={r.valor}
-                  onChange={(e) => atualizar("valor", e.target.value)}
-                />
+                <div className="relative">
+                  <span
+                    className="hint pointer-events-none absolute top-1/2 left-3 -translate-y-1/2"
+                    aria-hidden="true"
+                  >
+                    R$
+                  </span>
+                  <input
+                    id="valor"
+                    type="text"
+                    inputMode="numeric"
+                    autoComplete="off"
+                    placeholder="0,00"
+                    className={`${controlClass("input", Boolean(erroValor))} pl-10 text-right`}
+                    value={formatarCentavos(r.valorCentavos)}
+                    onChange={(e) => atualizar("valorCentavos", centavosDeTexto(e.target.value))}
+                  />
+                </div>
               </Field>
               <Field label="Confiança" htmlFor="confianca">
                 <select

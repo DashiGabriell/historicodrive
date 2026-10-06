@@ -40,11 +40,13 @@ describe("acessoPara", () => {
     }
     expect(acessoPara("/incidente/novo", dono)).toBe("ok");
     expect(acessoPara("/incidente/123", dono)).toBe("ok");
+    expect(acessoPara("/rascunhos", dono)).toBe("ok");
   });
 
   it("segura o dono sem locadora ativa", () => {
     expect(acessoPara("/painel", donoSemLocadora)).toBe("negado");
     expect(acessoPara("/incidente/novo", donoSemLocadora)).toBe("negado");
+    expect(acessoPara("/rascunhos", donoSemLocadora)).toBe("negado");
   });
 
   it("segura o dono cuja locadora ativa ainda nao foi aprovada", () => {
