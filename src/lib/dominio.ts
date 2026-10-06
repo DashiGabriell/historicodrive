@@ -3,10 +3,7 @@ import type { BadgeVariant } from "@/ui";
 export type Estado = "suspeita" | "confirmado" | "contestado";
 export type Confianca = "baixa" | "media" | "alta";
 export type TipoIncidente =
-  | "dano_veiculo"
-  | "fraude_documental"
-  | "nao_devolucao"
-  | "uso_indevido";
+  "dano_veiculo" | "fraude_documental" | "nao_devolucao" | "uso_indevido";
 
 export const TIPOS: Record<TipoIncidente, string> = {
   dano_veiculo: "Dano ao veículo",
@@ -46,6 +43,11 @@ export const ACOES: Record<string, string> = {
   "incidente.confirmado": "Incidente confirmado",
   "incidente.contestado": "Incidente contestado",
   "incidente.suspeita": "Incidente voltou a suspeita",
+  "contestacao.abrir": "Contestação aberta",
+  "contestacao.procedente": "Contestação procedente",
+  "contestacao.improcedente": "Contestação improcedente",
+  "conta.papel": "Papel da conta alterado",
+  "retencao.suspeitas": "Suspeitas vencidas expurgadas",
 };
 
 export function rotuloAcao(acao: string): string {
@@ -79,7 +81,9 @@ export function normalizarPlaca(valor: string): string {
 /** formato antigo (ABC-1234 / ABC1234) ou Mercosul (ABC1D23) */
 export function placaValida(valor: string): boolean {
   const placa = normalizarPlaca(valor);
-  return /^[A-Z]{3}-?[0-9]{4}$/.test(placa) || /^[A-Z]{3}[0-9][A-Z][0-9]{2}$/.test(placa);
+  return (
+    /^[A-Z]{3}-?[0-9]{4}$/.test(placa) || /^[A-Z]{3}[0-9][A-Z][0-9]{2}$/.test(placa)
+  );
 }
 
 export const PLACA_TAMANHO = 7;
@@ -179,7 +183,9 @@ export function formatarMoeda(valor: number | string | null): string {
 export function formatarData(iso: string | null): string {
   if (!iso) return "—";
   // date pura (yyyy-mm-dd) vira meia-noite local, nao UTC
-  const d = /^\d{4}-\d{2}-\d{2}$/.test(iso) ? new Date(`${iso}T00:00:00`) : new Date(iso);
+  const d = /^\d{4}-\d{2}-\d{2}$/.test(iso)
+    ? new Date(`${iso}T00:00:00`)
+    : new Date(iso);
   return data.format(d);
 }
 

@@ -38,7 +38,7 @@ export function acessoPara(caminho: string, perfil: PerfilResumo | null): Acesso
   if (PUBLICAS.includes(base)) return "publico";
   if (!perfil) return "login";
 
-  if (base === "/admin") {
+  if (base === "/admin" || base === "/dashitecnology") {
     return perfil.papel === "superadmin" ? "ok" : "negado";
   }
 
@@ -53,5 +53,5 @@ export function acessoPara(caminho: string, perfil: PerfilResumo | null): Acesso
 
 /** rota para onde um usuario recem-logado deve cair */
 export function rotaInicial(papel: Papel | null): string {
-  return papel === "superadmin" ? "/admin/pendentes" : "/painel";
+  return papel === "superadmin" ? "/dashitecnology" : "/painel";
 }

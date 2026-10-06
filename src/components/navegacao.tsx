@@ -19,7 +19,10 @@ export type NomeIcone =
   | "fila"
   | "mais"
   | "contestacao"
-  | "rascunho";
+  | "rascunho"
+  | "locadora"
+  | "contas"
+  | "retencao";
 
 export type ItemMenu = {
   href: string;
@@ -27,6 +30,8 @@ export type ItemMenu = {
   curto?: string;
   icone: NomeIcone;
   destaque?: boolean;
+  /** casa só a rota exata (a visão não fica ativa nos filhos) */
+  exato?: boolean;
   /** no celular sai da barra de abas e vai para a folha "Mais" */
   secundario?: boolean;
 };
@@ -56,10 +61,22 @@ const TRACOS: Record<NomeIcone, string[]> = {
     "M12 7v4",
     "M12 14h.01",
   ],
-  rascunho: [
-    "M12 20h9",
-    "M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z",
+  rascunho: ["M12 20h9", "M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"],
+  locadora: [
+    "M4 21V5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v16",
+    "M9 21v-6h6v6",
+    "M9 8h.01",
+    "M15 8h.01",
+    "M9 12h.01",
+    "M15 12h.01",
   ],
+  contas: [
+    "M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2",
+    "M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8",
+    "M22 21v-2a4 4 0 0 0-3-3.87",
+    "M16 3.13a4 4 0 0 1 0 7.75",
+  ],
+  retencao: ["M4 7h16", "M9 7V4h6v3", "M6 7l1 13h10l1-13"],
 };
 
 export function Icone({ nome }: { nome: NomeIcone }) {
@@ -93,7 +110,7 @@ export function BarraAbas({ itens, mais }: BarraAbasProps) {
         <NavLink
           key={item.href}
           to={item.href}
-          end={item.href === "/incidente/novo"}
+          end={item.exato || item.href === "/incidente/novo"}
           className={cx("tabbar-item", item.destaque && "tabbar-item-destaque")}
         >
           <span className="tabbar-icone">

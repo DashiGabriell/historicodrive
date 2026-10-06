@@ -23,6 +23,12 @@ import Contestar from "@/pages/contestar";
 import EsqueciSenha from "@/pages/esqueci-senha";
 import FilaAdmin from "@/pages/fila-admin";
 import Home from "@/pages/home";
+import OperadorContas from "@/pages/operador/contas";
+import OperadorLocadoras from "@/pages/operador/locadoras";
+import OperadorRecursos from "@/pages/operador/recursos";
+import OperadorRetencao from "@/pages/operador/retencao";
+import OperadorTrilha from "@/pages/operador/trilha";
+import OperadorVisao from "@/pages/operador/visao";
 import Incidente from "@/pages/incidente";
 import IncidenteNovo from "@/pages/incidente-novo";
 import Login from "@/pages/login";
@@ -46,7 +52,27 @@ const MENU_LOCADORA: ItemMenu[] = [
 ];
 
 const MENU_SUPERADMIN: ItemMenu[] = [
-  { href: "/admin/pendentes", rotulo: "Fila de aprovação", icone: "fila" },
+  { href: "/dashitecnology", rotulo: "Visão", icone: "painel", exato: true },
+  { href: "/dashitecnology/locadoras", rotulo: "Locadoras", icone: "locadora" },
+  { href: "/dashitecnology/recursos", rotulo: "Recursos", icone: "contestacao" },
+  {
+    href: "/dashitecnology/contas",
+    rotulo: "Contas",
+    icone: "contas",
+    secundario: true,
+  },
+  {
+    href: "/dashitecnology/retencao",
+    rotulo: "Retenção",
+    icone: "retencao",
+    secundario: true,
+  },
+  {
+    href: "/dashitecnology/trilha",
+    rotulo: "Trilha",
+    icone: "auditoria",
+    secundario: true,
+  },
 ];
 
 function protegida(elemento: ReactNode) {
@@ -156,7 +182,7 @@ export default function App() {
                 <NavLink
                   key={item.href}
                   to={item.href}
-                  end={item.href === "/incidente/novo"}
+                  end={item.exato || item.href === "/incidente/novo"}
                   className="nav-link"
                 >
                   {item.rotulo}
@@ -250,6 +276,27 @@ export default function App() {
           <Route path="/auditoria" element={protegida(<Auditoria />)} />
           <Route path="/contestacoes" element={protegida(<Contestacoes />)} />
           <Route path="/admin/pendentes" element={protegida(<FilaAdmin />)} />
+          <Route path="/dashitecnology" element={protegida(<OperadorVisao />)} />
+          <Route
+            path="/dashitecnology/locadoras"
+            element={protegida(<OperadorLocadoras />)}
+          />
+          <Route
+            path="/dashitecnology/recursos"
+            element={protegida(<OperadorRecursos />)}
+          />
+          <Route
+            path="/dashitecnology/contas"
+            element={protegida(<OperadorContas />)}
+          />
+          <Route
+            path="/dashitecnology/retencao"
+            element={protegida(<OperadorRetencao />)}
+          />
+          <Route
+            path="/dashitecnology/trilha"
+            element={protegida(<OperadorTrilha />)}
+          />
 
           <Route path="*" element={<NotFound />} />
         </Routes>

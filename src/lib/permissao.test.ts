@@ -23,7 +23,14 @@ describe("acessoPara", () => {
   });
 
   it("manda para o login quando nao ha sessao", () => {
-    for (const rota of ["/painel", "/busca", "/incidente/novo", "/admin/pendentes"]) {
+    for (const rota of [
+      "/painel",
+      "/busca",
+      "/incidente/novo",
+      "/admin/pendentes",
+      "/dashitecnology",
+      "/dashitecnology/locadoras",
+    ]) {
       expect(acessoPara(rota, null)).toBe("login");
     }
   });
@@ -63,8 +70,10 @@ describe("acessoPara", () => {
     expect(acessoPara("/painel", aprovada)).toBe("ok");
   });
 
-  it("impede o dono de chegar no /admin", () => {
+  it("impede o dono de chegar no /admin e no console do operador", () => {
     expect(acessoPara("/admin/pendentes", dono)).toBe("negado");
+    expect(acessoPara("/dashitecnology", dono)).toBe("negado");
+    expect(acessoPara("/dashitecnology/contas", dono)).toBe("negado");
   });
 
   it("impede o superadmin de usar as telas da locadora (vice-versa)", () => {
@@ -72,12 +81,14 @@ describe("acessoPara", () => {
       expect(acessoPara(rota, superadmin)).toBe("negado");
     }
     expect(acessoPara("/admin/pendentes", superadmin)).toBe("ok");
+    expect(acessoPara("/dashitecnology", superadmin)).toBe("ok");
+    expect(acessoPara("/dashitecnology/retencao", superadmin)).toBe("ok");
   });
 });
 
 describe("rotaInicial", () => {
-  it("leva o superadmin para a fila e o dono para o painel", () => {
-    expect(rotaInicial("superadmin")).toBe("/admin/pendentes");
+  it("leva o superadmin para o console e o dono para o painel", () => {
+    expect(rotaInicial("superadmin")).toBe("/dashitecnology");
     expect(rotaInicial("dono")).toBe("/painel");
   });
 });
