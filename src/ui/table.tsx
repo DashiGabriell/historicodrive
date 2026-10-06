@@ -27,7 +27,7 @@ export function DataTable<T>({
   }
 
   return (
-    <div className="table-wrap">
+    <div className="table-wrap table-responsiva">
       <table className="table">
         {caption ? <caption className="sr-only">{caption}</caption> : null}
         <thead>
@@ -49,6 +49,9 @@ export function DataTable<T>({
               {columns.map((column) => (
                 <td
                   key={column.key}
+                  data-label={
+                    typeof column.header === "string" ? column.header : undefined
+                  }
                   style={column.align === "right" ? { textAlign: "right" } : undefined}
                 >
                   {column.render(row)}

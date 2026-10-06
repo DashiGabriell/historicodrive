@@ -1,6 +1,7 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
+import { registrarServiceWorker } from "@/lib/pwa";
 import { SessaoProvider } from "@/lib/sessao";
 import App from "./App";
 import "./styles/globals.css";
@@ -20,3 +21,5 @@ createRoot(container).render(
     </BrowserRouter>
   </StrictMode>,
 );
+
+registrarServiceWorker();

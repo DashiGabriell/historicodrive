@@ -12,3 +12,665 @@
 @theme inline {
   --font-sans: var(--font);
 }
+
+/* o `container` do Tailwind (width: 100%, sem margem) venceria o do ESTILO e
+   colaria o conteúdo nas bordas do celular */
+@utility container {
+  width: min(
+    var(--container),
+    calc(100% - 2rem - env(safe-area-inset-left, 0px) - env(safe-area-inset-right, 0px))
+  );
+  margin-inline: auto;
+}
+
+/* Peças das telas que o ESTILO não cobre; continuam fora do Tailwind. */
+@layer components {
+  .eyebrow {
+    margin: 0;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: hsl(var(--primary));
+  }
+
+  .nav-link {
+    padding: 0.45rem 0.75rem;
+    border-radius: calc(var(--radius) - 6px);
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: hsl(var(--muted-foreground));
+    white-space: nowrap;
+  }
+
+  .nav-link:hover {
+    background: hsl(var(--muted));
+    color: hsl(var(--foreground));
+  }
+
+  .nav-link[aria-current="page"] {
+    background: hsl(var(--primary) / 0.12);
+    color: hsl(var(--primary));
+  }
+
+  .chart-bars {
+    height: 180px;
+    border-bottom: 1px solid hsl(var(--border));
+  }
+
+  .page-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 36px;
+    padding: 0 0.85rem;
+    border-radius: calc(var(--radius) - 6px);
+    color: hsl(var(--foreground));
+    font-size: 0.8125rem;
+    font-weight: 600;
+    white-space: nowrap;
+    cursor: pointer;
+    user-select: none;
+  }
+
+  /* campo em grade/flex encolhe junto (o <input type=date> tem largura mínima própria) */
+  .field {
+    min-width: 0;
+  }
+
+  .field > .input {
+    min-width: 0;
+  }
+
+  .tab[aria-pressed="true"] {
+    background: var(--surface-3d);
+    color: hsl(var(--foreground));
+    box-shadow: var(--plastic-raised-light);
+  }
+
+  .page-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .voltar {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.15rem;
+    min-height: 44px;
+    margin-left: -0.5rem;
+    padding: 0 0.5rem;
+    border: none;
+    border-radius: 12px;
+    background: transparent;
+    color: hsl(var(--primary));
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.12s ease;
+  }
+
+  .voltar:active {
+    opacity: 0.55;
+  }
+
+  .voltar svg {
+    width: 24px;
+    height: 24px;
+  }
+
+  .chart-bar {
+    width: 100%;
+    min-height: 4px;
+    border-radius: 8px 8px 0 0;
+    background: linear-gradient(180deg, hsl(var(--primary)), hsl(239 84% 58%));
+    box-shadow: 0 8px 16px -10px hsl(var(--primary) / 0.9);
+  }
+
+  .anexo-thumb {
+    aspect-ratio: 1;
+    overflow: hidden;
+    border: 1px solid hsl(var(--border));
+    border-radius: calc(var(--radius) - 4px);
+    background: hsl(var(--muted));
+  }
+
+  .anexo-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .step {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: hsl(var(--muted-foreground));
+  }
+
+  .step[aria-current="step"] {
+    color: hsl(var(--primary));
+  }
+
+  .step-num {
+    display: inline-grid;
+    place-items: center;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: hsl(var(--muted));
+    font-size: 0.8rem;
+  }
+
+  .step[aria-current="step"] .step-num {
+    background: hsl(var(--primary));
+    color: hsl(var(--primary-foreground));
+  }
+
+  .json-diff {
+    margin: 0;
+    padding: 0.75rem;
+    overflow-x: auto;
+    border-radius: calc(var(--radius) - 6px);
+    background: hsl(var(--muted));
+    font-size: 0.78rem;
+    line-height: 1.45;
+  }
+}
+
+/* =========================================================
+   Experiência de app (mobile / PWA instalado)
+   ========================================================= */
+@layer components {
+  :root {
+    --tabbar-h: 64px;
+    --safe-top: env(safe-area-inset-top, 0px);
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
+    --safe-left: env(safe-area-inset-left, 0px);
+    --safe-right: env(safe-area-inset-right, 0px);
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  #root {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    min-height: 100dvh;
+  }
+
+  a,
+  button,
+  label,
+  summary,
+  select,
+  input,
+  textarea,
+  [role="tab"] {
+    touch-action: manipulation;
+  }
+
+  /* barra superior translúcida, respeitando o notch */
+  .app-topo {
+    padding-top: var(--safe-top);
+    background: hsl(var(--background) / 0.86);
+    border-bottom: 1px solid hsl(var(--border));
+    -webkit-backdrop-filter: saturate(180%) blur(16px);
+    backdrop-filter: saturate(180%) blur(16px);
+  }
+
+  .conta-botao {
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    border: none;
+    border-radius: 50%;
+    background: transparent;
+    cursor: pointer;
+    transition: transform 0.12s ease;
+  }
+
+  .conta-botao:active {
+    transform: scale(0.92);
+  }
+
+  .faixa-offline {
+    margin: 0;
+    padding: 0.4rem 1rem;
+    background: hsl(var(--warning) / 0.18);
+    color: hsl(32 95% 30%);
+    font-size: 0.8125rem;
+    font-weight: 600;
+    text-align: center;
+  }
+
+  /* ---------- barra de abas inferior ---------- */
+  .tabbar {
+    position: fixed;
+    inset-inline: 0;
+    bottom: 0;
+    z-index: 50;
+    display: flex;
+    align-items: stretch;
+    gap: 0.125rem;
+    min-height: calc(var(--tabbar-h) + var(--safe-bottom));
+    padding: 0.3rem calc(0.4rem + var(--safe-right)) calc(0.3rem + var(--safe-bottom))
+      calc(0.4rem + var(--safe-left));
+    background: hsl(var(--card) / 0.9);
+    border-top: 1px solid hsl(var(--border));
+    -webkit-backdrop-filter: saturate(180%) blur(18px);
+    backdrop-filter: saturate(180%) blur(18px);
+    user-select: none;
+  }
+
+  .tabbar-item {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.15rem;
+    color: hsl(var(--muted-foreground));
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    transition:
+      color 0.15s ease,
+      transform 0.12s ease;
+  }
+
+  .tabbar-item:active {
+    transform: scale(0.92);
+  }
+
+  .tabbar-icone {
+    display: grid;
+    place-items: center;
+    width: 52px;
+    height: 30px;
+    border-radius: 999px;
+    transition:
+      background 0.2s ease,
+      transform 0.2s ease;
+  }
+
+  .tabbar-icone svg {
+    width: 22px;
+    height: 22px;
+  }
+
+  .tabbar-rotulo {
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .tabbar-item[aria-current="page"] {
+    color: hsl(var(--primary));
+  }
+
+  .tabbar-item[aria-current="page"] .tabbar-icone {
+    background: hsl(var(--primary) / 0.13);
+  }
+
+  /* ação principal (Registrar) em destaque, no plástico primário */
+  .tabbar-item-destaque .tabbar-icone,
+  .tabbar-item-destaque[aria-current="page"] .tabbar-icone {
+    width: 50px;
+    height: 50px;
+    margin-top: -20px;
+    border-radius: 18px;
+    color: #fff;
+    background-color: #6366f1;
+    background-image:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.32) 0%, rgba(255, 255, 255, 0) 42%),
+      var(--btn-3d-primary);
+    box-shadow:
+      var(--plastic-raised),
+      0 0 0 4px hsl(var(--background));
+  }
+
+  .tabbar-item-destaque:active .tabbar-icone {
+    box-shadow:
+      var(--plastic-pressed),
+      0 0 0 4px hsl(var(--background));
+  }
+
+  .tabbar-item-destaque .tabbar-icone svg {
+    width: 26px;
+    height: 26px;
+  }
+
+  /* ---------- folha inferior (bottom sheet) ---------- */
+  .folha {
+    position: fixed;
+    inset: auto 0 0;
+    width: 100%;
+    max-width: 100%;
+    max-height: 88dvh;
+    margin: 0;
+    padding: 0 calc(1.25rem + var(--safe-right)) calc(1.25rem + var(--safe-bottom))
+      calc(1.25rem + var(--safe-left));
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    border: none;
+    border-radius: 24px 24px 0 0;
+    background: var(--surface-3d, hsl(var(--card)));
+    color: hsl(var(--foreground));
+    transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .folha[open] {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    animation: folhaSobe 0.34s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .folha::backdrop {
+    background: rgb(15 23 42 / 0.45);
+    animation: folhaFundo 0.25s ease;
+  }
+
+  .folha-topo {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    padding-top: 0.6rem;
+    touch-action: none;
+    cursor: grab;
+  }
+
+  .folha-alca {
+    align-self: center;
+    width: 40px;
+    height: 5px;
+    border-radius: 999px;
+    background: hsl(var(--muted-foreground) / 0.35);
+  }
+
+  .folha-grupo {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    margin: 0;
+    padding: 0;
+    border: none;
+  }
+
+  .folha-grupo legend {
+    margin-bottom: 0.5rem;
+  }
+
+  .folha-opcao {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    min-height: 52px;
+    padding: 0 1rem;
+    border: 1px solid hsl(var(--border));
+    border-radius: calc(var(--radius) - 4px);
+    background: hsl(var(--card));
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  .folha-opcao:has(input:checked) {
+    border-color: hsl(var(--primary) / 0.5);
+    background: hsl(var(--primary) / 0.07);
+  }
+
+  @keyframes folhaSobe {
+    from {
+      transform: translateY(100%);
+    }
+  }
+
+  @keyframes folhaFundo {
+    from {
+      opacity: 0;
+    }
+  }
+
+  /* ---------- entrada de tela ---------- */
+  main > * {
+    animation: telaEntra 0.28s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  @keyframes telaEntra {
+    from {
+      opacity: 0;
+      transform: translateY(6px);
+    }
+  }
+
+  /* barra de ações que gruda acima das abas enquanto o formulário rola */
+  .acoes-fixas {
+    position: sticky;
+    bottom: 0;
+    z-index: 10;
+  }
+
+  /* ---------- tabela vira lista de cartões no celular ---------- */
+  @media (width < 40rem) {
+    .table-wrap.table-responsiva {
+      overflow: visible;
+      border: none;
+      background: transparent;
+    }
+
+    .table-responsiva .table {
+      min-width: 0;
+    }
+
+    .table-responsiva thead {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+    }
+
+    .table-responsiva tbody {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .table-responsiva tr {
+      display: flex;
+      flex-direction: column;
+      padding: 0.5rem 1rem;
+      border: 1px solid hsl(var(--border));
+      border-radius: var(--radius);
+      background: var(--surface-3d, hsl(var(--card)));
+    }
+
+    .table-responsiva td {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 0.25rem 1rem;
+      padding: 0.5rem 0;
+      text-align: right !important;
+    }
+
+    .table-responsiva td + td {
+      border-top: 1px dashed hsl(var(--border));
+    }
+
+    .table-responsiva tr td {
+      border-bottom: none;
+    }
+
+    .table-responsiva td[data-label]::before {
+      content: attr(data-label);
+      flex-shrink: 0;
+      color: hsl(var(--muted-foreground));
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-align: left;
+      text-transform: uppercase;
+    }
+
+    .table-responsiva td:first-child {
+      justify-content: flex-start;
+      font-size: 1rem;
+      text-align: left !important;
+    }
+
+    .table-responsiva td:first-child::before {
+      display: none;
+    }
+  }
+
+  /* ---------- só no celular / tablet pequeno ---------- */
+  @media (width < 48rem) {
+    :root {
+      --header-h: 60px;
+    }
+
+    .com-abas main {
+      padding-bottom: calc(var(--tabbar-h) + var(--safe-bottom) + 0.5rem);
+    }
+
+    .metric {
+      padding: 0.9rem 1rem;
+    }
+
+    .metric .label {
+      font-size: 0.75rem;
+    }
+
+    .metric .value {
+      font-size: 1.2rem;
+      white-space: nowrap;
+    }
+
+    .com-abas .acoes-fixas {
+      bottom: calc(var(--tabbar-h) + var(--safe-bottom));
+    }
+
+    .acoes-fixas {
+      margin-inline: -1rem;
+      padding: 0.75rem 1rem;
+      background: hsl(var(--background) / 0.9);
+      border-top: 1px solid hsl(var(--border));
+      -webkit-backdrop-filter: blur(14px);
+      backdrop-filter: blur(14px);
+    }
+
+    .acoes-fixas > .btn {
+      flex: 1;
+    }
+  }
+
+  /* dedo, não mouse: alvos de no mínimo 44px e sem zoom automático no iOS */
+  @media (pointer: coarse) {
+    .btn-sm,
+    .page-btn,
+    .tab,
+    .nav-link {
+      min-height: 44px;
+    }
+
+    .nav-link {
+      display: inline-flex;
+      align-items: center;
+    }
+
+    .input,
+    .select,
+    .textarea {
+      font-size: max(1rem, 16px);
+    }
+
+    .checkbox,
+    .radio {
+      width: 22px;
+      height: 22px;
+    }
+
+    .tabs {
+      flex-wrap: nowrap;
+      max-width: 100%;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+
+    .tab {
+      flex-shrink: 0;
+    }
+
+    /* datas no iOS: valor alinhado à esquerda e altura estável */
+    .input[type="date"] {
+      -webkit-appearance: none;
+      appearance: none;
+    }
+
+    .input::-webkit-date-and-time-value {
+      text-align: left;
+    }
+  }
+
+  /* hover não existe no toque: evita o "efeito grudado" depois do tap */
+  @media (hover: none) {
+    .card:hover {
+      transform: none;
+      border-color: hsl(var(--border));
+      background: var(--surface-3d);
+    }
+
+    .btn:hover:not(:disabled):not([aria-disabled="true"]) {
+      filter: none;
+    }
+
+    .btn-outline:hover:not(:disabled) {
+      color: hsl(var(--foreground));
+      border-color: hsl(var(--primary) / 0.4);
+    }
+
+    .nav-link:not([aria-current="page"]):hover {
+      background: transparent;
+      color: hsl(var(--muted-foreground));
+    }
+  }
+
+  /* instalado: sem "quique" de navegador nem seleção acidental do casco */
+  @media (display-mode: standalone) {
+    html,
+    body {
+      overscroll-behavior-y: none;
+    }
+
+    .app-topo,
+    .tabbar {
+      -webkit-user-select: none;
+      user-select: none;
+    }
+
+    .app-topo a,
+    .app-topo button,
+    .tabbar a {
+      -webkit-touch-callout: none;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    main > *,
+    .folha[open],
+    .folha::backdrop {
+      animation: none;
+    }
+  }
+}

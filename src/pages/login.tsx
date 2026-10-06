@@ -121,8 +121,8 @@ export default function Login() {
           >
             Esqueci minha senha
           </Link>
-          <ButtonLink href="/" variant="ghost" size="sm">
-            Voltar
+          <ButtonLink href="/cadastro" variant="ghost" size="sm">
+            Cadastrar minha locadora
           </ButtonLink>
         </div>
       </div>

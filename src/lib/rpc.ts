@@ -1,0 +1,45 @@
+import { supabase } from "./supabase";
+
+/** mensagens cruas das RPCs (sem acento, em snake de dev) para texto de tela */
+const TRADUCOES: Array<[RegExp, string]> = [
+  [/nenhuma locadora ativa/, "Sua locadora ainda não foi aprovada ou não há locadora ativa."],
+  [/nao autenticado|perfil nao encontrado/, "Sua sessão expirou. Entre de novo."],
+  [/acesso negado/, "Sua conta não tem permissão para esta ação."],
+  [/termo de busca muito curto/, "Digite ao menos 3 caracteres."],
+  [/confirme o CPF/i, "Confirme o CPF completo para abrir a ficha."],
+  [/registro nao encontrado|incidente nao encontrado|motorista nao encontrado/, "Registro não encontrado."],
+  [/cpf ja cadastrado com outro nome/, "Este CPF já está cadastrado com outro nome. Confira a grafia do nome completo."],
+  [/cpf invalido/, "CPF inválido."],
+  [/cnpj invalido/, "CNPJ inválido: use os 14 dígitos."],
+  [/uf invalida/, "UF inválida: use a sigla com 2 letras."],
+  [/nome completo invalido/, "Informe o nome completo do motorista."],
+  [/placa invalida/, "Placa inválida. Use ABC-1234 ou ABC1D23."],
+  [/descricao precisa/, "A descrição precisa de ao menos 10 caracteres."],
+  [/valor invalido/, "Valor inválido."],
+  [/ao menos uma foto/, "Envie ao menos uma foto ou documento."],
+  [/maximo de 6 anexos/, "Máximo de 6 anexos por incidente."],
+  [/anexo/, "Um dos anexos é inválido. Remova e envie de novo."],
+  [/toda transicao exige motivo/, "Informe o motivo (ao menos 5 caracteres)."],
+  [/transicao .* nao permitida/, "Essa mudança de estado não é permitida."],
+  [/estado ja e/, "O incidente já está nesse estado."],
+  [/recusa exige motivo/, "A recusa exige um motivo (ao menos 5 caracteres)."],
+  [/periodo invalido/, "Período inválido: a data inicial vem depois da final."],
+  [/locadora_cnpj_uniq|duplicate key.*cnpj/, "Já existe uma locadora com este CNPJ."],
+];
+
+export function traduzirErro(mensagem: string): string {
+  for (const [padrao, texto] of TRADUCOES) {
+    if (padrao.test(mensagem)) return texto;
+  }
+  return mensagem;
+}
+
+export function mensagemDe(causa: unknown, padrao: string): string {
+  return causa instanceof Error ? causa.message : padrao;
+}
+
+export async function rpc<T>(nome: string, args?: Record<string, unknown>): Promise<T> {
+  const { data, error } = await supabase.rpc(nome, args);
+  if (error) throw new Error(traduzirErro(error.message));
+  return data as T;
+}

@@ -3,12 +3,14 @@ export type Papel = "superadmin" | "dono";
 export type PerfilResumo = {
   papel: Papel;
   locadora_ativa: string | null;
+  locadoras?: Array<{ id: string; status: "pendente" | "aprovada" | "recusada" }>;
 };
 
-/** publico: acessa sem sessao | login: falta sessao | negado: sessao sem papel */
-export type Acesso = "publico" | "login" | "negado" | "ok";
+/** publico: acessa sem sessao | login: falta sessao | negado: sessao sem papel
+ *  | pendente: dono cuja locadora ativa ainda nao foi aprovada */
+export type Acesso = "publico" | "login" | "negado" | "pendente" | "ok";
 
-const PUBLICAS = ["/", "/login", "/esqueci-senha", "/redefinir", "/styleguide"];
+const PUBLICAS = ["/", "/login", "/cadastro", "/esqueci-senha", "/redefinir", "/styleguide"];
 
 const ROTAS_LOCADORA = [
   "/painel",
@@ -30,7 +32,9 @@ export function acessoPara(caminho: string, perfil: PerfilResumo | null): Acesso
   }
 
   if (ROTAS_LOCADORA.includes(base)) {
-    return perfil.papel === "dono" && perfil.locadora_ativa ? "ok" : "negado";
+    if (perfil.papel !== "dono" || !perfil.locadora_ativa) return "negado";
+    const ativa = perfil.locadoras?.find((l) => l.id === perfil.locadora_ativa);
+    return ativa && ativa.status !== "aprovada" ? "pendente" : "ok";
   }
 
   return "ok";

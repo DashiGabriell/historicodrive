@@ -10,7 +10,14 @@ const superadmin: PerfilResumo = { papel: "superadmin", locadora_ativa: null };
 
 describe("acessoPara", () => {
   it("deixa as rotas publicas abertas sem sessao", () => {
-    for (const rota of ["/", "/login", "/esqueci-senha", "/redefinir", "/styleguide"]) {
+    for (const rota of [
+      "/",
+      "/login",
+      "/cadastro",
+      "/esqueci-senha",
+      "/redefinir",
+      "/styleguide",
+    ]) {
       expect(acessoPara(rota, null)).toBe("publico");
     }
   });
@@ -38,6 +45,20 @@ describe("acessoPara", () => {
   it("segura o dono sem locadora ativa", () => {
     expect(acessoPara("/painel", donoSemLocadora)).toBe("negado");
     expect(acessoPara("/incidente/novo", donoSemLocadora)).toBe("negado");
+  });
+
+  it("segura o dono cuja locadora ativa ainda nao foi aprovada", () => {
+    const pendente: PerfilResumo = {
+      ...dono,
+      locadoras: [{ id: dono.locadora_ativa!, status: "pendente" }],
+    };
+    const aprovada: PerfilResumo = {
+      ...dono,
+      locadoras: [{ id: dono.locadora_ativa!, status: "aprovada" }],
+    };
+    expect(acessoPara("/painel", pendente)).toBe("pendente");
+    expect(acessoPara("/busca", pendente)).toBe("pendente");
+    expect(acessoPara("/painel", aprovada)).toBe("ok");
   });
 
   it("impede o dono de chegar no /admin", () => {

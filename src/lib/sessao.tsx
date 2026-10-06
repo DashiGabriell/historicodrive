@@ -1,6 +1,11 @@
 import type { User } from "@supabase/supabase-js";
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
-import { CtxSessao, type ContextoSessao, type Perfil } from "./sessao-contexto";
+import {
+  CtxSessao,
+  type ContextoSessao,
+  type DadosCadastro,
+  type Perfil,
+} from "./sessao-contexto";
 import { supabase } from "./supabase";
 
 /** Sessao de 7 dias: o Supabase so permite configurar timebox em plano Pro,
@@ -24,7 +29,41 @@ function mensagemDeErro(erro: { message: string; code?: string }): string {
   if (/user not found/i.test(erro.message)) {
     return "E-mail não encontrado.";
   }
+  if (/already registered|user_already_exists/i.test(erro.message)) {
+    return "Este e-mail já tem conta. Entre com ele ou recupere a senha.";
+  }
   return erro.message;
+}
+
+/** varios eventos de auth chegam juntos; cada pedido gera uma locadora,
+ *  entao ele so pode sair uma vez por usuario */
+const pedidosDeCadastro = new Map<string, Promise<boolean>>();
+
+/** conta recem-criada sem perfil: envia o pedido guardado no user_metadata */
+async function concluirCadastroPendente(): Promise<boolean> {
+  const { data } = await supabase.auth.getSession();
+  const conta = data.session?.user;
+  const pedido = conta?.user_metadata?.cadastro as DadosCadastro | undefined;
+  if (!conta || !pedido) return false;
+
+  let envio = pedidosDeCadastro.get(conta.id);
+  if (!envio) {
+    envio = Promise.resolve(
+      supabase.rpc("solicitar_cadastro", {
+        p_nome_locadora: pedido.nome_locadora,
+        p_cnpj: pedido.cnpj,
+        p_cidade: pedido.cidade,
+        p_uf: pedido.uf,
+        p_email_contato: pedido.email_contato,
+        p_nome_dono: pedido.nome_dono,
+      }),
+    ).then(({ error }) => {
+      if (error) pedidosDeCadastro.delete(conta.id);
+      return !error;
+    });
+    pedidosDeCadastro.set(conta.id, envio);
+  }
+  return envio;
 }
 
 export function SessaoProvider({ children }: { children: ReactNode }) {
@@ -33,7 +72,10 @@ export function SessaoProvider({ children }: { children: ReactNode }) {
   const [carregando, setCarregando] = useState(true);
 
   const recarregarPerfil = useCallback(async () => {
-    const { data, error } = await supabase.rpc("meu_perfil");
+    let { data, error } = await supabase.rpc("meu_perfil");
+    if ((error || !data) && (await concluirCadastroPendente())) {
+      ({ data, error } = await supabase.rpc("meu_perfil"));
+    }
     const bruto = (error ? null : data) as Partial<Perfil> | null;
 
     // conta sem linha de perfil: cai para a tela de cadastro pendente
@@ -116,6 +158,26 @@ export function SessaoProvider({ children }: { children: ReactNode }) {
     [recarregarPerfil],
   );
 
+  const cadastrar = useCallback(
+    async (email: string, senha: string, dados: DadosCadastro) => {
+      const { data, error } = await supabase.auth.signUp({
+        email: email.trim(),
+        password: senha,
+        options: {
+          data: { cadastro: dados },
+          emailRedirectTo: `${window.location.origin}/login`,
+        },
+      });
+      if (error) throw new Error(mensagemDeErro(error));
+      if (!data.session) return false;
+
+      localStorage.setItem(CHAVE_INICIO, String(Date.now()));
+      await recarregarPerfil();
+      return true;
+    },
+    [recarregarPerfil],
+  );
+
   const sair = useCallback(async () => {
     await supabase.auth.signOut();
   }, []);
@@ -149,6 +211,7 @@ export function SessaoProvider({ children }: { children: ReactNode }) {
       usuario,
       perfil,
       entrar,
+      cadastrar,
       sair,
       esqueciSenha,
       trocarSenha,
@@ -160,6 +223,7 @@ export function SessaoProvider({ children }: { children: ReactNode }) {
       usuario,
       perfil,
       entrar,
+      cadastrar,
       sair,
       esqueciSenha,
       trocarSenha,

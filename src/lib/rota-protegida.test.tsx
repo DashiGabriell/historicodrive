@@ -14,6 +14,7 @@ function contexto(perfil: Perfil | null, carregando = false): ContextoSessao {
     usuario: null,
     perfil,
     entrar: async () => undefined,
+    cadastrar: async () => false,
     sair: async () => undefined,
     esqueciSenha: async () => undefined,
     trocarSenha: async () => undefined,

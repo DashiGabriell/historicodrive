@@ -40,6 +40,7 @@ type ButtonLinkProps = AnchorHTMLAttributes<HTMLAnchorElement> & {
   href: string;
   variant?: ButtonVariant;
   size?: ButtonSize;
+  state?: unknown;
 };
 
 export function ButtonLink({
@@ -47,9 +48,15 @@ export function ButtonLink({
   variant = "primary",
   size = "md",
   className,
+  state,
   ...rest
 }: ButtonLinkProps) {
   return (
-    <Link to={href} className={buttonClassName(variant, size, className)} {...rest} />
+    <Link
+      to={href}
+      state={state}
+      className={buttonClassName(variant, size, className)}
+      {...rest}
+    />
   );
 }

@@ -1,28 +1,80 @@
-import { useState } from "react";
-import { Link, Route, Routes } from "react-router-dom";
+import { useEffect, useState, type ReactNode } from "react";
+import {
+  Link,
+  NavLink,
+  Route,
+  Routes,
+  useLocation,
+  useNavigate,
+  useNavigationType,
+} from "react-router-dom";
+import { BarraAbas, FolhaConta, type ItemMenu } from "@/components/navegacao";
+import { iniciais } from "@/lib/dominio";
+import { acessoPara, rotaInicial } from "@/lib/permissao";
+import { useOnline } from "@/lib/pwa";
 import { RotaProtegida } from "@/lib/rota-protegida";
 import { useSessao } from "@/lib/sessao-contexto";
-import {
-  Auditoria,
-  Busca,
-  Configuracoes,
-  FilaAdmin,
-  Incidente,
-  IncidenteNovo,
-  Motorista,
-  Painel,
-} from "@/pages/em-construcao";
+import Auditoria from "@/pages/auditoria";
+import Busca from "@/pages/busca";
+import Cadastro from "@/pages/cadastro";
+import Configuracoes from "@/pages/configuracoes";
 import EsqueciSenha from "@/pages/esqueci-senha";
+import FilaAdmin from "@/pages/fila-admin";
 import Home from "@/pages/home";
+import Incidente from "@/pages/incidente";
+import IncidenteNovo from "@/pages/incidente-novo";
 import Login from "@/pages/login";
+import Motorista from "@/pages/motorista";
 import NotFound from "@/pages/not-found";
+import Painel from "@/pages/painel";
 import RedefinirSenha from "@/pages/redefinir-senha";
 import Styleguide from "@/pages/styleguide";
-import { Alert, Button, ButtonLink, controlClass } from "@/ui";
+import { Alert, Button, ButtonLink, controlClass, cx } from "@/ui";
+
+const MENU_LOCADORA: ItemMenu[] = [
+  { href: "/painel", rotulo: "Painel", icone: "painel" },
+  { href: "/busca", rotulo: "Buscar", icone: "buscar" },
+  { href: "/incidente/novo", rotulo: "Registrar", icone: "registrar", destaque: true },
+  { href: "/auditoria", rotulo: "Auditoria", icone: "auditoria" },
+  { href: "/config", rotulo: "Configurações", curto: "Ajustes", icone: "config" },
+];
+
+const MENU_SUPERADMIN: ItemMenu[] = [
+  { href: "/admin/pendentes", rotulo: "Fila de aprovação", icone: "fila" },
+];
+
+function protegida(elemento: ReactNode) {
+  return <RotaProtegida>{elemento}</RotaProtegida>;
+}
+
+/** como app nativo: tela nova abre no topo; voltar preserva a posição */
+function useRolagemAoTopo() {
+  const { pathname } = useLocation();
+  const tipo = useNavigationType();
+  useEffect(() => {
+    if (tipo !== "POP") window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+  }, [pathname, tipo]);
+}
 
 export default function App() {
   const { carregando, perfil, trocarLocadora, sair } = useSessao();
   const [erroTroca, setErroTroca] = useState<string | null>(null);
+  const [contaAberta, setContaAberta] = useState(false);
+  const online = useOnline();
+  const local = useLocation();
+  const navegar = useNavigate();
+  useRolagemAoTopo();
+
+  const telaDeDetalhe = /^\/(motorista\/[^/]+|incidente\/(?!novo$)[^/]+)$/.test(
+    local.pathname,
+  );
+
+  function voltar() {
+    // aberto direto por link não há histórico interno para onde voltar
+    if (local.key === "default")
+      navegar(rotaInicial(perfil?.papel ?? null), { replace: true });
+    else navegar(-1);
+  }
 
   async function trocarLocadoraAtiva(locadoraId: string) {
     setErroTroca(null);
@@ -36,48 +88,117 @@ export default function App() {
   }
 
   const locadoraAtual = perfil?.locadoras.find((l) => l.id === perfil.locadora_ativa);
+  const menu = !perfil
+    ? []
+    : perfil.papel === "superadmin"
+      ? MENU_SUPERADMIN
+      : acessoPara("/painel", perfil) === "ok"
+        ? MENU_LOCADORA
+        : [];
+  const comAbas = menu.length > 1;
 
   return (
-    <>
-      <header className="sticky top-0 z-50 bg-background border-b border-[hsl(var(--border))]">
-        <div className="container flex h-[72px] items-center justify-between gap-4">
-          <Link to="/" className="flex items-center gap-3">
+    <div className={cx("flex flex-1 flex-col", comAbas && "com-abas")}>
+      <header className="app-topo sticky top-0 z-50">
+        <div className="container flex h-[var(--header-h)] items-center justify-between gap-4">
+          {telaDeDetalhe ? (
+            <button type="button" className="voltar md:hidden" onClick={voltar}>
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth={2.4}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+              >
+                <path d="m15 18-6-6 6-6" />
+              </svg>
+              Voltar
+            </button>
+          ) : null}
+          <Link
+            to="/"
+            className={cx(
+              "shrink-0 items-center gap-3",
+              telaDeDetalhe ? "hidden md:flex" : "flex",
+            )}
+          >
             <img src="/logo.png" alt="" width={36} height={36} className="h-9 w-9" />
-            <span className="text-lg font-semibold tracking-tight text-foreground">
+            <span
+              className={cx(
+                "text-lg font-semibold tracking-tight text-foreground",
+                perfil ? "inline" : "hidden sm:inline",
+              )}
+            >
               Histórico<span className="text-primary">Drive</span>
             </span>
           </Link>
 
-          <nav aria-label="Principal" className="flex items-center gap-2">
+          {menu.length > 0 ? (
+            <nav
+              aria-label="Seções"
+              className={cx(
+                "min-w-0 flex-1 items-center gap-1 overflow-x-auto",
+                comAbas ? "hidden md:flex" : "flex",
+              )}
+            >
+              {menu.map((item) => (
+                <NavLink
+                  key={item.href}
+                  to={item.href}
+                  end={item.href === "/incidente/novo"}
+                  className="nav-link"
+                >
+                  {item.rotulo}
+                </NavLink>
+              ))}
+            </nav>
+          ) : null}
+
+          <nav aria-label="Conta" className="flex shrink-0 items-center gap-2">
             {carregando ? null : perfil ? (
               <>
-                {perfil.locadoras.length > 1 ? (
-                  <select
-                    aria-label="Locadora ativa"
-                    className={controlClass("select")}
-                    value={perfil.locadora_ativa ?? ""}
-                    onChange={(e) => void trocarLocadoraAtiva(e.target.value)}
-                  >
-                    {perfil.locadoras.map((locadora) => (
-                      <option key={locadora.id} value={locadora.id}>
-                        {locadora.nome}
-                      </option>
-                    ))}
-                  </select>
-                ) : locadoraAtual ? (
-                  <span className="label hidden sm:inline">{locadoraAtual.nome}</span>
-                ) : null}
+                <div className="hidden items-center gap-2 md:flex">
+                  {perfil.locadoras.length > 1 ? (
+                    <select
+                      aria-label="Locadora ativa"
+                      className={controlClass("select")}
+                      value={perfil.locadora_ativa ?? ""}
+                      onChange={(e) => void trocarLocadoraAtiva(e.target.value)}
+                    >
+                      {perfil.locadoras.map((locadora) => (
+                        <option key={locadora.id} value={locadora.id}>
+                          {locadora.nome}
+                        </option>
+                      ))}
+                    </select>
+                  ) : locadoraAtual ? (
+                    <span className="label hidden lg:inline">{locadoraAtual.nome}</span>
+                  ) : null}
 
-                <span className="label hidden md:inline">{perfil.nome}</span>
+                  <span className="label hidden xl:inline">{perfil.nome}</span>
 
-                <Button variant="outline" size="sm" onClick={() => void sair()}>
-                  Sair
-                </Button>
+                  <Button variant="outline" size="sm" onClick={() => void sair()}>
+                    Sair
+                  </Button>
+                </div>
+
+                <button
+                  type="button"
+                  className="conta-botao md:hidden"
+                  aria-label={`Conta de ${perfil.nome}`}
+                  aria-haspopup="dialog"
+                  aria-expanded={contaAberta}
+                  onClick={() => setContaAberta(true)}
+                >
+                  <span className="avatar">{iniciais(perfil.nome)}</span>
+                </button>
               </>
             ) : (
               <>
-                <ButtonLink href="/styleguide" variant="ghost" size="sm">
-                  Design system
+                <ButtonLink href="/cadastro" variant="ghost" size="sm">
+                  Sou locadora
                 </ButtonLink>
                 <ButtonLink href="/login" size="sm">
                   Entrar
@@ -86,6 +207,11 @@ export default function App() {
             )}
           </nav>
         </div>
+        {!online ? (
+          <p className="faixa-offline" role="status">
+            Sem conexão. O que já foi carregado continua na tela.
+          </p>
+        ) : null}
       </header>
 
       {erroTroca ? (
@@ -99,77 +225,40 @@ export default function App() {
           <Route path="/" element={<Home />} />
           <Route path="/styleguide" element={<Styleguide />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/cadastro" element={<Cadastro />} />
           <Route path="/esqueci-senha" element={<EsqueciSenha />} />
           <Route path="/redefinir" element={<RedefinirSenha />} />
 
-          <Route
-            path="/painel"
-            element={
-              <RotaProtegida>
-                <Painel />
-              </RotaProtegida>
-            }
-          />
-          <Route
-            path="/busca"
-            element={
-              <RotaProtegida>
-                <Busca />
-              </RotaProtegida>
-            }
-          />
-          <Route
-            path="/motorista/:id"
-            element={
-              <RotaProtegida>
-                <Motorista />
-              </RotaProtegida>
-            }
-          />
-          <Route
-            path="/incidente/novo"
-            element={
-              <RotaProtegida>
-                <IncidenteNovo />
-              </RotaProtegida>
-            }
-          />
-          <Route
-            path="/incidente/:id"
-            element={
-              <RotaProtegida>
-                <Incidente />
-              </RotaProtegida>
-            }
-          />
-          <Route
-            path="/config"
-            element={
-              <RotaProtegida>
-                <Configuracoes />
-              </RotaProtegida>
-            }
-          />
-          <Route
-            path="/auditoria"
-            element={
-              <RotaProtegida>
-                <Auditoria />
-              </RotaProtegida>
-            }
-          />
-          <Route
-            path="/admin/pendentes"
-            element={
-              <RotaProtegida>
-                <FilaAdmin />
-              </RotaProtegida>
-            }
-          />
+          <Route path="/painel" element={protegida(<Painel />)} />
+          <Route path="/busca" element={protegida(<Busca />)} />
+          <Route path="/motorista/:id" element={protegida(<Motorista />)} />
+          <Route path="/incidente/novo" element={protegida(<IncidenteNovo />)} />
+          <Route path="/incidente/:id" element={protegida(<Incidente />)} />
+          <Route path="/config" element={protegida(<Configuracoes />)} />
+          <Route path="/auditoria" element={protegida(<Auditoria />)} />
+          <Route path="/admin/pendentes" element={protegida(<FilaAdmin />)} />
 
           <Route path="*" element={<NotFound />} />
         </Routes>
       </main>
-    </>
+
+      {comAbas ? <BarraAbas itens={menu} /> : null}
+
+      {perfil ? (
+        <FolhaConta
+          perfil={perfil}
+          aberta={contaAberta}
+          onFechar={() => setContaAberta(false)}
+          onTrocarLocadora={(id) => {
+            setContaAberta(false);
+            void trocarLocadoraAtiva(id);
+          }}
+          onSair={() => {
+            setContaAberta(false);
+            void sair();
+          }}
+        />
+      ) : null}
+    </div>
   );
 }

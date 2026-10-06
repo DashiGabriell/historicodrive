@@ -16,11 +16,22 @@ export type Perfil = {
   locadoras: LocadoraDaConta[];
 };
 
+export type DadosCadastro = {
+  nome_locadora: string;
+  cnpj: string | null;
+  cidade: string | null;
+  uf: string | null;
+  email_contato: string;
+  nome_dono: string;
+};
+
 export type ContextoSessao = {
   carregando: boolean;
   usuario: User | null;
   perfil: Perfil | null;
   entrar: (email: string, senha: string) => Promise<void>;
+  /** devolve true quando ja abriu sessao (sem confirmacao de e-mail) */
+  cadastrar: (email: string, senha: string, dados: DadosCadastro) => Promise<boolean>;
   sair: () => Promise<void>;
   esqueciSenha: (email: string) => Promise<void>;
   trocarSenha: (senha: string) => Promise<void>;

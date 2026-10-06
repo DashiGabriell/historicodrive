@@ -13,6 +13,7 @@ export { cx } from "./cx";
 export { EmptyState } from "./empty-state";
 export { Field, controlClass } from "./field";
 export { Metric, type MetricTone } from "./metric";
+export { PageHeader } from "./page-header";
 export { Skeleton } from "./skeleton";
 export { DataTable, type Column } from "./table";
 export { Switch } from "./switch";
