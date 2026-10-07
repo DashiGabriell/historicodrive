@@ -1311,3 +1311,54 @@
     }
   }
 }
+
+/* ------------------------------------------------------------------
+   Splash em vídeo (só no app instalado)
+   ------------------------------------------------------------------ */
+@layer components {
+  .splash-video {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    /* cor do fundo do próprio vídeo: o letterbox some */
+    background: #0a1016;
+    opacity: 1;
+    transition: opacity 0.35s ease;
+  }
+
+  .splash-video[data-saindo] {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .splash-video video {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .splash-pular {
+    position: absolute;
+    top: calc(var(--safe-top) + 1rem);
+    right: calc(var(--safe-right) + 1rem);
+    min-width: 44px;
+    min-height: 44px;
+    padding: 0.5rem 1.1rem;
+    border: 1px solid rgb(255 255 255 / 0.35);
+    border-radius: 999px;
+    background: rgb(10 16 22 / 0.55);
+    color: #fff;
+    font: inherit;
+    font-size: 0.9rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    backdrop-filter: blur(6px);
+    cursor: pointer;
+  }
+
+  .splash-pular:focus-visible {
+    outline: 2px solid #fff;
+    outline-offset: 2px;
+  }
+}

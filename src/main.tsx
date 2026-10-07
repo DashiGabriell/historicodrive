@@ -1,6 +1,7 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
+import { SplashVideo } from "@/components/splash-video";
 import { iniciarInstalacao, registrarServiceWorker } from "@/lib/pwa";
 import { SessaoProvider } from "@/lib/sessao";
 import App from "./App";
@@ -21,6 +22,7 @@ createRoot(container).render(
         <App />
       </SessaoProvider>
     </BrowserRouter>
+    <SplashVideo />
   </StrictMode>,
 );
 

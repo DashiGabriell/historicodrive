@@ -91,6 +91,8 @@ self.addEventListener("fetch", (evento) => {
     return;
   }
   if (url.pathname === "/sw.js") return;
+  // vídeo vem em Range requests (Safari): resposta inteira do cache quebra o play
+  if (url.pathname.endsWith(".mp4")) return;
   evento.respondWith(revalidarEmSegundoPlano(req));
 });
 
