@@ -10,6 +10,7 @@ import {
   type Estado,
   type TipoIncidente,
 } from "@/lib/dominio";
+import { atualizarNaoLidas } from "@/lib/notificacoes";
 import { rpc } from "@/lib/rpc";
 import { useSessao } from "@/lib/sessao-contexto";
 import { useCarga } from "@/lib/use-carga";
@@ -144,6 +145,7 @@ export default function Painel() {
     try {
       await rpc("marcar_notificacao_lida", { p_notificacao_id: n.id });
       notificacoes.recarregar();
+      void atualizarNaoLidas();
     } catch {
       /* falha silenciosa: alerta e so um atalho */
     }
@@ -223,7 +225,12 @@ export default function Painel() {
 
       {notificacoes.dados && notificacoes.dados.some((n) => !n.lida) ? (
         <Card className="flex flex-col gap-3">
-          <CardTitle>Alertas</CardTitle>
+          <div className="flex items-center justify-between gap-3">
+            <CardTitle>Alertas</CardTitle>
+            <Link to="/notificacoes" className="text-sm font-semibold text-primary">
+              Ver todas
+            </Link>
+          </div>
           <ul className="flex flex-col gap-2">
             {notificacoes.dados
               .filter((n) => !n.lida)

@@ -239,6 +239,79 @@
     transform: scale(0.92);
   }
 
+  /* ---------- sino de notificações ---------- */
+  .sino {
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    color: hsl(var(--foreground));
+    transition:
+      background-color 0.12s ease,
+      transform 0.12s ease;
+  }
+
+  .sino svg {
+    width: 22px;
+    height: 22px;
+  }
+
+  .sino:hover,
+  .sino.active {
+    background: hsl(var(--secondary));
+  }
+
+  .sino.active {
+    color: hsl(var(--primary));
+  }
+
+  .sino:active {
+    transform: scale(0.92);
+  }
+
+  .sino-contador {
+    position: absolute;
+    top: 4px;
+    right: 2px;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 5px;
+    border: 2px solid hsl(var(--background));
+    border-radius: 999px;
+    background: hsl(var(--destructive));
+    color: hsl(var(--destructive-foreground));
+    font-size: 0.6875rem;
+    font-weight: 700;
+    line-height: 14px;
+    text-align: center;
+    box-sizing: content-box;
+  }
+
+  .notificacao-item {
+    position: relative;
+  }
+
+  /* barra lateral à parte para não trocar a sombra do card */
+  .notificacao-item[data-nao-lida]::before {
+    content: "";
+    position: absolute;
+    top: 12px;
+    bottom: 12px;
+    left: 0;
+    width: 3px;
+    border-radius: 0 3px 3px 0;
+    background: hsl(var(--primary));
+  }
+
+  .notificacao-titulo {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 600;
+    line-height: 1.35;
+  }
+
   .faixa-offline {
     margin: 0;
     padding: 0.4rem 1rem;

@@ -8,8 +8,9 @@ import {
   useNavigate,
   useNavigationType,
 } from "react-router-dom";
-import { BarraAbas, FolhaConta, type ItemMenu } from "@/components/navegacao";
+import { BarraAbas, FolhaConta, Icone, type ItemMenu } from "@/components/navegacao";
 import { iniciais } from "@/lib/dominio";
+import { useNaoLidas } from "@/lib/notificacoes";
 import { acessoPara, rotaInicial } from "@/lib/permissao";
 import { useOnline } from "@/lib/pwa";
 import { RotaProtegida } from "@/lib/rota-protegida";
@@ -34,6 +35,8 @@ import IncidenteNovo from "@/pages/incidente-novo";
 import Login from "@/pages/login";
 import Motorista from "@/pages/motorista";
 import NotFound from "@/pages/not-found";
+import Notificacoes from "@/pages/notificacoes";
+import OperadorComunicados from "@/pages/operador/comunicados";
 import Painel from "@/pages/painel";
 import Rascunhos from "@/pages/rascunhos";
 import RedefinirSenha from "@/pages/redefinir-senha";
@@ -55,6 +58,12 @@ const MENU_SUPERADMIN: ItemMenu[] = [
   { href: "/dashitecnology", rotulo: "Visão", icone: "painel", exato: true },
   { href: "/dashitecnology/locadoras", rotulo: "Locadoras", icone: "locadora" },
   { href: "/dashitecnology/recursos", rotulo: "Recursos", icone: "contestacao" },
+  {
+    href: "/dashitecnology/comunicados",
+    rotulo: "Comunicados",
+    icone: "sino",
+    secundario: true,
+  },
   {
     href: "/dashitecnology/contas",
     rotulo: "Contas",
@@ -127,6 +136,12 @@ export default function App() {
       : acessoPara("/painel", perfil) === "ok"
         ? MENU_LOCADORA
         : [];
+  const chaveSino =
+    perfil?.papel === "dono" && acessoPara("/notificacoes", perfil) === "ok"
+      ? perfil.locadora_ativa
+      : null;
+  const naoLidas = useNaoLidas(chaveSino);
+  const totalNaoLidas = naoLidas.alertas + naoLidas.novidades;
   const comAbas = menu.length > 1;
   const abas = menu.filter((item) => !item.secundario);
   const secundarios = menu.filter((item) => item.secundario);
@@ -194,6 +209,24 @@ export default function App() {
           <nav aria-label="Conta" className="flex shrink-0 items-center gap-2">
             {carregando ? null : perfil ? (
               <>
+                {chaveSino ? (
+                  <NavLink
+                    to="/notificacoes"
+                    className="sino"
+                    aria-label={
+                      totalNaoLidas > 0
+                        ? `Notificações: ${totalNaoLidas} não lida${totalNaoLidas > 1 ? "s" : ""}`
+                        : "Notificações"
+                    }
+                  >
+                    <Icone nome="sino" />
+                    {totalNaoLidas > 0 ? (
+                      <span className="sino-contador" aria-hidden="true">
+                        {totalNaoLidas > 99 ? "99+" : totalNaoLidas}
+                      </span>
+                    ) : null}
+                  </NavLink>
+                ) : null}
                 <div className="hidden items-center gap-2 md:flex">
                   {perfil.locadoras.length > 1 ? (
                     <select
@@ -272,6 +305,7 @@ export default function App() {
           <Route path="/incidente/novo" element={protegida(<IncidenteNovo />)} />
           <Route path="/incidente/:id" element={protegida(<Incidente />)} />
           <Route path="/rascunhos" element={protegida(<Rascunhos />)} />
+          <Route path="/notificacoes" element={protegida(<Notificacoes />)} />
           <Route path="/config" element={protegida(<Configuracoes />)} />
           <Route path="/auditoria" element={protegida(<Auditoria />)} />
           <Route path="/contestacoes" element={protegida(<Contestacoes />)} />
@@ -284,6 +318,10 @@ export default function App() {
           <Route
             path="/dashitecnology/recursos"
             element={protegida(<OperadorRecursos />)}
+          />
+          <Route
+            path="/dashitecnology/comunicados"
+            element={protegida(<OperadorComunicados />)}
           />
           <Route
             path="/dashitecnology/contas"

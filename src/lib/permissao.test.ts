@@ -48,6 +48,11 @@ describe("acessoPara", () => {
     expect(acessoPara("/incidente/novo", dono)).toBe("ok");
     expect(acessoPara("/incidente/123", dono)).toBe("ok");
     expect(acessoPara("/rascunhos", dono)).toBe("ok");
+    expect(acessoPara("/notificacoes", dono)).toBe("ok");
+  });
+
+  it("comunicados do operador são só do superadmin", () => {
+    expect(acessoPara("/dashitecnology/comunicados", dono)).toBe("negado");
   });
 
   it("segura o dono sem locadora ativa", () => {
