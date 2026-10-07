@@ -324,7 +324,6 @@ function Formulario({ locadoraId, rascunhoId }: { locadoraId: string; rascunhoId
               <input
                 type="file"
                 accept={TIPOS_ACEITOS}
-                capture="environment"
                 multiple
                 className="sr-only"
                 disabled={r.anexos.length >= MAX_ANEXOS}

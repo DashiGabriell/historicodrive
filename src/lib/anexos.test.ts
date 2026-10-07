@@ -1,5 +1,23 @@
 import { describe, expect, it } from "vitest";
-import { FORMATO_HASH, sha256Hex } from "./anexos";
+import { FORMATO_HASH, sha256Hex, tipoDoArquivo } from "./anexos";
+
+describe("tipoDoArquivo", () => {
+  it("usa o type do navegador quando o bucket aceita", () => {
+    expect(tipoDoArquivo({ name: "IMG_0001.JPG", type: "image/jpeg" })).toBe("image/jpeg");
+    expect(tipoDoArquivo({ name: "contrato.pdf", type: "application/pdf" })).toBe("application/pdf");
+  });
+
+  it("deduz pela extensão quando o iOS entrega sem type", () => {
+    expect(tipoDoArquivo({ name: "IMG_0002.HEIC", type: "" })).toBe("image/heic");
+    expect(tipoDoArquivo({ name: "foto.jpeg", type: "" })).toBe("image/jpeg");
+  });
+
+  it("recusa o que o bucket não aceita", () => {
+    expect(tipoDoArquivo({ name: "anim.gif", type: "image/gif" })).toBeNull();
+    expect(tipoDoArquivo({ name: "sem-extensao", type: "" })).toBeNull();
+    expect(tipoDoArquivo({ name: "video.mov", type: "video/quicktime" })).toBeNull();
+  });
+});
 
 describe("sha256Hex (prova de integridade do anexo)", () => {
   it("devolve 64 hex minusculos", async () => {
